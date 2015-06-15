@@ -2,4 +2,19 @@ package com.didactilab.jsjvm.client.runtime.constant;
 
 public interface Constant {
 
+	int CONSTANT_CLASS = 7;
+	int CONSTANT_FIELDREF = 9;
+	int CONSTANT_METHODREF = 10;
+	int CONSTANT_INTERFACEMETHODREF = 11;
+	int CONSTANT_STRING = 8;
+	int CONSTANT_INTEGER = 3;
+	int CONSTANT_FLOAT = 4;
+	int CONSTANT_LONG = 5;
+	int CONSTANT_DOUBLE = 6;
+	int CONSTANT_NAMEANDTYPE = 12;
+	int CONSTANT_UTF8 = 1;
+	int CONSTANT_METHODHANDLE = 15;
+	int CONSTANT_METHODTYPE = 16;
+	int CONSTANT_INVOKEDYNAMIC = 18;
+	
 }
