@@ -1,6 +1,7 @@
 package com.didactilab.jsjvm.client.runtime.constant;
 
-public abstract class AbstractConstant implements Constant {
+
+public abstract class AbstractConstant {
 
 	private final ConstantPool owner;
 
@@ -12,8 +13,12 @@ public abstract class AbstractConstant implements Constant {
 		return owner;
 	}
 	
-	protected <T extends Constant> T getConstant(int index, Class<T> constantClass) {
+	protected <T> T getConstant(int index, Class<T> constantClass) {
 		return owner.get(index, constantClass);
+	}
+	
+	protected String getString(int index) {
+		return getConstant(index, String.class);
 	}
 	
 }
