@@ -1,7 +1,6 @@
 package com.didactilab.jsjvm.client.runtime.constant;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,16 +14,17 @@ public class ConstantPool {
 	
 	private StringHashTable stringTable = new StringHashTable();
 	
-	private ArrayList<Object> list;
+	private Object[] list;
 	
 	public void read(Reader reader) throws InvalidClassFileFormatException, IOException {
-		int length = reader.readUInt16();
+		int count = reader.readUInt16();
 		
-		LOGGER.info("Constant pool with " + length + " constants");
+		LOGGER.info("Constant pool with " + count + " constants");
 		
-		list = new ArrayList<>(length);
-		for (int i=0; i<length-1; i++) {
+		list = new Object[count - 1];
+		for (int i=1; i<count; i++) {
 			int type = reader.readUInt8();
+			int delta = 0;
 			
 			LOGGER.info("read constant " + i + " => " + type);
 			
@@ -43,7 +43,7 @@ public class ConstantPool {
 					constant = new InterfaceMethodRefConstant(this, reader); 
 					break;
 				case Constant.CONSTANT_STRING: 
-					constant = readString(reader); 
+					constant = new StringConstant(this, reader); 
 					break;
 				case Constant.CONSTANT_INTEGER: 
 					constant = readInteger(reader); 
@@ -53,9 +53,13 @@ public class ConstantPool {
 					break;
 				case Constant.CONSTANT_LONG: 
 					constant = readLong(reader); 
+					delta = 1;
+					System.err.println("i++");
 					break;
 				case Constant.CONSTANT_DOUBLE: 
 					constant = readDouble(reader); 
+					delta = 1;
+					System.err.println("i++");
 					break;
 				case Constant.CONSTANT_NAMEANDTYPE: 
 					constant = new NameAndTypeConstant(this, reader); 
@@ -74,24 +78,27 @@ public class ConstantPool {
 					break;
 				default: throw new InvalidClassFileFormatException("constant not recognized : " + type);
 			}
-			list.add(constant);
+			list[i-1] = constant;
+			i += delta;
 		}
 		
 		if (LOGGER.isLoggable(Level.INFO)) {
-			for (int i=0, c=list.size(); i<c; i++) {
-				System.out.println("constant " + i + " : " + list.get(i));
+			for (int i=0, c=list.length; i<c; i++) {
+				if (list[i] != null) {
+					System.out.println("constant " + (i+1) + " : " + list[i]);
+				}
 			}
 		}
 	}
 	
 	public <T> T get(int index, Class<T> constantClass) {
-		Object constant = list.get(index - 1);
+		Object constant = list[index - 1];
 		if (constantClass.isAssignableFrom(constant.getClass())) {
 		//if (constant.getClass().isAssignableFrom(constantClass)) {
 			return constantClass.cast(constant);
 		} else {
-			System.err.println(constant);
-			throw new IllegalArgumentException("wanted class " + constantClass.getName() + ", constant class " + constant.getClass().getName());
+			throw new IllegalArgumentException("wanted class " + constantClass.getSimpleName() + ", constant class " + 
+					constant.getClass().getSimpleName() + ", at index " + (index - 1));
 		}
 	}
 	
@@ -122,11 +129,6 @@ public class ConstantPool {
 		byte[] bytes = reader.readBytes(length);
 		String str = new String(bytes, "UTF-8");
 		return stringTable.get(str);
-	}
-	
-	private Object readString(Reader reader) throws IOException {
-		int index = reader.readUInt16();
-		return get(index, String.class);
 	}
 	
 }

@@ -41,6 +41,8 @@ public class Code extends Attribute {
 	private int maxStack;
 	private int maxLocals;
 	
+	private byte[] code;
+	
 	private Exception[] exceptionTable;
 	private Attributes attributes;
 	
@@ -55,7 +57,7 @@ public class Code extends Attribute {
 		maxStack = reader.readUInt16();
 		maxLocals = reader.readUInt16();
 		long codeSize = reader.readUInt32();
-		byte[] code = reader.readBytes((int) codeSize);
+		code = reader.readBytes((int) codeSize);
 		int exceptionTableLength = reader.readUInt16();
 		exceptionTable = new Exception[exceptionTableLength];
 		for (int i = 0; i < exceptionTableLength; i++) {
@@ -67,7 +69,9 @@ public class Code extends Attribute {
 
 	@Override
 	public void print(Printer printer) {
-		// TODO Auto-generated method stub
+		printer.println("max stack : ", maxStack);
+		printer.println("max locals : ", maxLocals);
+		printer.println("code size : ", code.length);
 		
 	}
 

@@ -26,7 +26,7 @@ public abstract class JavaMember {
 		accessFlags = reader.readUInt16();
 		
 		if ((accessFlags & getAllowedAccessFlagsMask()) != accessFlags) {
-			throw new InvalidClassFileFormatException("The access flags of a " + getMemberTypeName() + " is not valid");
+			throw new InvalidClassFileFormatException("The access flags of a " + getMemberTypeName() + " is not valid : " + Integer.toHexString(accessFlags));
 		}
 		
 		name = javaClass.getConstantPool().getString(reader.readUInt16());

@@ -18,7 +18,7 @@ public abstract class AbstractConstant {
 	}
 	
 	protected String getString(int index) {
-		return getConstant(index, String.class);
+		return owner.getString(index);
 	}
 	
 }
