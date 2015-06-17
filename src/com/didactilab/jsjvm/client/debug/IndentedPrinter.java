@@ -5,6 +5,8 @@ public class IndentedPrinter implements Printer {
 	private final String indent;
 	private final Printer printer;
 	
+	private boolean startOfLine = true;
+	
 	public IndentedPrinter(Printer printer, String indent) {
 		this.printer = printer;
 		this.indent = indent;
@@ -12,23 +14,37 @@ public class IndentedPrinter implements Printer {
 	
 	@Override
 	public void println(Object o) {
-		printer.println(indent, o);
+		if (startOfLine) {
+			printer.print(indent);
+		}
+		printer.println(o);
+		startOfLine = true;
 	}
 
 	@Override
 	public void println(Object... objects) {
-		printer.print(indent);
+		if (startOfLine) {
+			printer.print(indent);
+		}
 		printer.println(objects);
+		startOfLine = true;
 	}
 
 	@Override
 	public void print(Object o) {
-		printer.print(indent, o);
+		if (startOfLine) {
+			printer.print(indent);
+			startOfLine = false;
+		}
+		printer.print(o);
 	}
 
 	@Override
 	public void print(Object... objects) {
-		printer.print(indent);
+		if (startOfLine) {
+			printer.print(indent);
+			startOfLine = false;
+		}
 		printer.print(objects);
 	}
 

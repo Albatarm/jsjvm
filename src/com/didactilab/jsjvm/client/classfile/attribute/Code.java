@@ -5,6 +5,8 @@ import java.io.IOException;
 import com.didactilab.jsjvm.client.Factory;
 import com.didactilab.jsjvm.client.classfile.Attribute;
 import com.didactilab.jsjvm.client.classfile.Attributes;
+import com.didactilab.jsjvm.client.classfile.OpCodeData;
+import com.didactilab.jsjvm.client.debug.IndentedPrinter;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
 import com.didactilab.jsjvm.client.runtime.InvalidClassFileFormatException;
@@ -46,6 +48,8 @@ public class Code extends Attribute {
 	private Exception[] exceptionTable;
 	private Attributes attributes;
 	
+	private ConstantPool constants;
+	
 	public Code() {
 		super(NAME);
 	}
@@ -53,6 +57,7 @@ public class Code extends Attribute {
 	@Override
 	public void read(ConstantPool constants, Reader reader) throws IOException,
 			InvalidClassFileFormatException {
+		this.constants = constants;
 		super.read(constants, reader);
 		maxStack = reader.readUInt16();
 		maxLocals = reader.readUInt16();
@@ -71,7 +76,16 @@ public class Code extends Attribute {
 	public void print(Printer printer) {
 		printer.println("max stack : ", maxStack);
 		printer.println("max locals : ", maxLocals);
-		printer.println("code size : ", code.length);
+		printer.println("code :");
+		Printer p = new IndentedPrinter(printer, "   ");
+		int pos = 0;
+		while (pos < code.length) {
+			int op = code[pos++] & 0xFF;
+			OpCodeData opCode = OpCodeData.valueOfCode(op);
+			p.print(opCode.name);
+			pos += opCode.getParamSize();
+			p.println();
+		}
 		
 	}
 
