@@ -100,7 +100,7 @@ public class JavaClass {
 		File file = new File(".");
 		file = file.getAbsoluteFile();
 		System.out.println(file.toString());
-		String filename = "test/test.class";
+		String filename = "test/JavaClass.class";
 		FileReader reader = new FileReader(filename);
 		
 		JavaClass classFileReader = new JavaClass(reader);

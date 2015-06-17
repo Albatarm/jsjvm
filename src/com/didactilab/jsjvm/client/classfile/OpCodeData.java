@@ -229,15 +229,15 @@ public enum OpCodeData {
 	IMPDEP1(OpCode.IMPDEP1, "impdep1"),
 	IMPDEP2(OpCode.IMPDEP2, "impdep2");
 
-	enum Param {
+	public enum Param {
 		LOCAL_VARIABLE_INDEX(1), // unsigned byte
 		LOCAL_VARIABLE_INDEX_AS_RETURN_ADDRESS(1),	// unsigned byte
 		CONSTANT_POOL_INDEX(2), // unsigned short
 		CONSTANT_POOL_INDEX_BYTE(1), // unsigned byte
 		BYTE_VALUE(1), // signed byte
 		SHORT_VALUE(2),	// signed short
-		BRANCH_OFFSET(2), 
-		BRANCH_OFFSET_W(4), 
+		BRANCH_OFFSET(2), 	// signed short
+		BRANCH_OFFSET_W(4), 	// signed int
 		NULL(1), // 0
 		COUNT(1),  // unsigned byte
 		LOOKUPSWITCH(-1),	// variable

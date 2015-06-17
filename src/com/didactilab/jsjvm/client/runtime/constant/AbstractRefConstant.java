@@ -36,7 +36,8 @@ public abstract class AbstractRefConstant extends AbstractConstant {
 	
 	@Override
 	public String toString() {
-		return "[" + getType() + "] " + getClassName().getName() + "::" + getNameAndType().getName() + getNameAndType().getDescriptor();
+		return "[" + getType() + "] " + getClassName().getName() + "::" + getNameAndType().getName() + 
+				getNameAndType().getDescriptor();
 	}
 	
 }
