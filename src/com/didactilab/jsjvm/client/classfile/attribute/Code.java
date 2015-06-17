@@ -8,6 +8,7 @@ import com.didactilab.jsjvm.client.Factory;
 import com.didactilab.jsjvm.client.classfile.Attribute;
 import com.didactilab.jsjvm.client.classfile.Attributes;
 import com.didactilab.jsjvm.client.classfile.OpCodeData;
+import com.didactilab.jsjvm.client.classfile.attribute.LocalVariableTable.Variable;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
@@ -136,6 +137,8 @@ public class Code extends Attribute {
 		ArrayList<Instruction> instructions = new ArrayList<>();
 		Labels labels = new Labels();
 		
+		LocalVariableTable variableTable = attributes.get(LocalVariableTable.NAME, LocalVariableTable.class);
+		
 		int pos = 0;
 		while (pos < code.length) {
 			int oppos = pos;
@@ -209,7 +212,14 @@ public class Code extends Attribute {
 					case LOCAL_VARIABLE_INDEX_AS_RETURN_ADDRESS:
 						{
 							int index = code[pos++] & 0xFF;
-							text += " #" + index;
+							String name;
+							if (variableTable != null) {
+								Variable var = variableTable.getVariableAt(oppos, index);
+								name = var != null ? var.name : String.valueOf(index);
+							} else {
+								name = String.valueOf(index);
+							}
+							text += " #" + name;
 						}
 						break;
 					/*case LOOKUPSWITCH:
@@ -259,6 +269,10 @@ public class Code extends Attribute {
 				printer.println("  from ", labels.get(ex.startPc), " to ", labels.get(ex.endPc), " => ", 
 						labels.get(ex.handlerPc), " for ", ex.catchType);
 			}
+		}
+		
+		if (!attributes.isEmpty()) {
+			attributes.print(printer);
 		}
 		
 	}

@@ -1,0 +1,20 @@
+<project name="jsjvm">
+	
+	<property name="build" value="build" />
+	<property name="build.runtime" value="build/runtime" />
+
+	<property name="runtime.source" value="runtime" />
+	
+	<target name="clean" description="Clean build dir">
+		<delete dir="${build}" />
+	</target>
+	
+	<target name="build-rt" description="Build runtime">
+		<mkdir dir="${build.runtime}" />
+		<javac srcdir="${runtime.source}" destdir="${build.runtime}" target="1.8"  
+			includeantruntime="false" debug="true">
+			<include name="java/lang/String.java"/>
+		</javac>
+	</target>
+
+</project>

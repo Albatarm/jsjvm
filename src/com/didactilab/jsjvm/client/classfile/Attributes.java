@@ -5,6 +5,9 @@ import java.util.HashMap;
 
 import com.didactilab.jsjvm.client.Factory;
 import com.didactilab.jsjvm.client.classfile.attribute.Code;
+import com.didactilab.jsjvm.client.classfile.attribute.ConstantValue;
+import com.didactilab.jsjvm.client.classfile.attribute.LineNumberTable;
+import com.didactilab.jsjvm.client.classfile.attribute.LocalVariableTable;
 import com.didactilab.jsjvm.client.classfile.attribute.SourceFile;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;
 import com.didactilab.jsjvm.client.debug.Printer;
@@ -19,6 +22,9 @@ public class Attributes {
 	static {
 		factory(SourceFile.NAME, SourceFile.FACTORY);
 		factory(Code.NAME, Code.FACTORY);
+		factory(LineNumberTable.NAME, LineNumberTable.FACTORY);
+		factory(LocalVariableTable.NAME, LocalVariableTable.FACTORY);
+		factory(ConstantValue.NAME, ConstantValue.FACTORY);
 	}
 	
 	private static void factory(String name, Factory<Attribute> factory) {
@@ -27,6 +33,8 @@ public class Attributes {
 
 	private final ConstantPool constants;
 	private Attribute[] attributes;
+	
+	private HashMap<String, Attribute> attributeByName;
 
 	public Attributes(ConstantPool constants) {
 		this.constants = constants;
@@ -50,6 +58,29 @@ public class Attributes {
 			Attribute attr = attributes[i];
 			printer.println("   - ", attr.getName(), " : ");
 			attr.print(new IndentedPrinter(printer, "      "));
+		}
+	}
+	
+	public boolean isEmpty() {
+		return attributes.length == 0;
+	}
+	
+	public <T extends Attribute> T get(String name, Class<T> attributeClass) {
+		if (attributeByName == null) {
+			attributeByName = new HashMap<>();
+			for (Attribute attr : attributes) {
+				attributeByName.put(attr.getName(), attr);
+			}
+		}
+		Attribute attr = attributeByName.get(name);
+		if (attr != null) {
+			if (attributeClass.isInstance(attr)) {
+				return attributeClass.cast(attr);
+			} else {
+				throw new IllegalArgumentException();
+			}
+		} else {
+			return null;
 		}
 	}
 	

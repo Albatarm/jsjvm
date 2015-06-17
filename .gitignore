@@ -14,3 +14,5 @@ hs_err_pid*
 # GWT war project file
 /war/jsjvm
 /war/WEB-INF/deploy
+
+/build
