@@ -4,12 +4,11 @@ import java.io.File;
 import java.io.IOException;
 
 import com.didactilab.jsjvm.client.classfile.attribute.Attributes;
+import com.didactilab.jsjvm.client.classfile.constant.ClassConstant;
+import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.SystemPrinter;
 import com.didactilab.jsjvm.client.reader.FileReader;
 import com.didactilab.jsjvm.client.reader.Reader;
-import com.didactilab.jsjvm.client.runtime.InvalidClassFileFormatException;
-import com.didactilab.jsjvm.client.runtime.constant.ClassConstant;
-import com.didactilab.jsjvm.client.runtime.constant.ConstantPool;
 
 public class JavaClass {
 

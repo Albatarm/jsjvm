@@ -1,11 +1,11 @@
-package com.didactilab.jsjvm.client.runtime.constant;
+package com.didactilab.jsjvm.client.classfile.constant;
 
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
 import com.didactilab.jsjvm.client.reader.Reader;
-import com.didactilab.jsjvm.client.runtime.InvalidClassFileFormatException;
 import com.didactilab.jsjvm.client.runtime.string.StringHashTable;
 
 public class ConstantPool {

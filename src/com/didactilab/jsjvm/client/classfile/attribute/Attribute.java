@@ -2,10 +2,10 @@ package com.didactilab.jsjvm.client.classfile.attribute;
 
 import java.io.IOException;
 
+import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
+import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
-import com.didactilab.jsjvm.client.runtime.InvalidClassFileFormatException;
-import com.didactilab.jsjvm.client.runtime.constant.ConstantPool;
 
 public abstract class Attribute {
 

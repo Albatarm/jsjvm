@@ -1,4 +1,4 @@
-package com.didactilab.jsjvm.client.runtime;
+package com.didactilab.jsjvm.client.classfile;
 
 public class InvalidClassFileFormatException extends Exception {
 	

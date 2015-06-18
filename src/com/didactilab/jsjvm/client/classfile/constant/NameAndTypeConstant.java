@@ -1,4 +1,4 @@
-package com.didactilab.jsjvm.client.runtime.constant;
+package com.didactilab.jsjvm.client.classfile.constant;
 
 import java.io.IOException;
 

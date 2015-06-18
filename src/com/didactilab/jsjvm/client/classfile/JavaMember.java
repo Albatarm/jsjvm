@@ -6,7 +6,6 @@ import com.didactilab.jsjvm.client.classfile.attribute.Attributes;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
-import com.didactilab.jsjvm.client.runtime.InvalidClassFileFormatException;
 
 public abstract class JavaMember {
 
