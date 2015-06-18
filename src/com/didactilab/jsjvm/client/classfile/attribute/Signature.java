@@ -8,20 +8,20 @@ import com.didactilab.jsjvm.client.reader.Reader;
 import com.didactilab.jsjvm.client.runtime.InvalidClassFileFormatException;
 import com.didactilab.jsjvm.client.runtime.constant.ConstantPool;
 
-public class SourceFile extends Attribute {
+public class Signature extends Attribute {
 
-	public static final String NAME = "SourceFile";
+	public static final String NAME = "Signature";
 	
 	public static final Factory<Attribute> FACTORY = new Factory<Attribute>() {
 		@Override
 		public Attribute create() {
-			return new SourceFile();
+			return new Signature();
 		}
 	};
 	
-	private String source;
+	private String signature;
 	
-	public SourceFile() {
+	public Signature() {
 		super(NAME);
 	}
 	
@@ -29,12 +29,16 @@ public class SourceFile extends Attribute {
 	public void read(ConstantPool constants, Reader reader) throws IOException,
 			InvalidClassFileFormatException {
 		super.read(constants, reader);
-		source = constants.getString(reader.readUInt16());
+		signature = constants.getString(reader.readUInt16());
 	}
 
 	@Override
 	public void print(Printer printer) {
-		printer.println("file " + source);
+		printer.println(signature);
+	}
+	
+	public String getSignature() {
+		return signature;
 	}
 
 }

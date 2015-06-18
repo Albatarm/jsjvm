@@ -3,6 +3,7 @@ package com.didactilab.jsjvm.client.classfile;
 import java.io.File;
 import java.io.IOException;
 
+import com.didactilab.jsjvm.client.classfile.attribute.Attributes;
 import com.didactilab.jsjvm.client.debug.SystemPrinter;
 import com.didactilab.jsjvm.client.reader.FileReader;
 import com.didactilab.jsjvm.client.reader.Reader;
@@ -100,11 +101,15 @@ public class JavaClass {
 		File file = new File(".");
 		file = file.getAbsoluteFile();
 		System.out.println(file.toString());
-		String filename = "test/JavaClass.class";
+		String filename = "test/String.class";
 		FileReader reader = new FileReader(filename);
 		
 		JavaClass classFileReader = new JavaClass(reader);
 		classFileReader.read();
+		
+		//
+		System.out.println();
+		System.out.println(UnknownAttribute.UNKNOWN_ATTRIBUTES);
 		
 	}
 	

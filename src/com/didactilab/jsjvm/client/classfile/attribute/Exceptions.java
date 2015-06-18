@@ -6,22 +6,23 @@ import com.didactilab.jsjvm.client.Factory;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
 import com.didactilab.jsjvm.client.runtime.InvalidClassFileFormatException;
+import com.didactilab.jsjvm.client.runtime.constant.ClassConstant;
 import com.didactilab.jsjvm.client.runtime.constant.ConstantPool;
 
-public class SourceFile extends Attribute {
+public class Exceptions extends Attribute {
 
-	public static final String NAME = "SourceFile";
+	public static final String NAME = "Exceptions";
 	
 	public static final Factory<Attribute> FACTORY = new Factory<Attribute>() {
 		@Override
 		public Attribute create() {
-			return new SourceFile();
+			return new Exceptions();
 		}
 	};
 	
-	private String source;
+	private ClassConstant[] exceptions;
 	
-	public SourceFile() {
+	public Exceptions() {
 		super(NAME);
 	}
 	
@@ -29,12 +30,22 @@ public class SourceFile extends Attribute {
 	public void read(ConstantPool constants, Reader reader) throws IOException,
 			InvalidClassFileFormatException {
 		super.read(constants, reader);
-		source = constants.getString(reader.readUInt16());
+		int length = reader.readUInt16();
+		exceptions = new ClassConstant[length];
+		for (int i = 0; i < length; i++) {
+			exceptions[i] = constants.get(reader.readUInt16(), ClassConstant.class);
+		}
 	}
 
 	@Override
 	public void print(Printer printer) {
-		printer.println("file " + source);
+		for (ClassConstant classConstant : exceptions) {
+			printer.println(classConstant);
+		}
+	}
+	
+	public ClassConstant[] getExceptions() {
+		return exceptions;
 	}
 
 }

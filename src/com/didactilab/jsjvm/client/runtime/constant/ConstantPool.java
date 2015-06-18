@@ -92,6 +92,9 @@ public class ConstantPool {
 	}
 	
 	public <T> T get(int index, Class<T> constantClass) {
+		if (index <= 0 || index > list.length) {
+			throw new IndexOutOfBoundsException("The constant index is out of bounds : " + index + "/" + list.length);
+		}
 		Object constant = list[index - 1];
 		if (constantClass.isAssignableFrom(constant.getClass())) {
 		//if (constant.getClass().isAssignableFrom(constantClass)) {

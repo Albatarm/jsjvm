@@ -1,4 +1,4 @@
-package com.didactilab.jsjvm.client.classfile;
+package com.didactilab.jsjvm.client.classfile.attribute;
 
 import java.io.IOException;
 

@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.didactilab.jsjvm.client.Factory;
-import com.didactilab.jsjvm.client.classfile.Attribute;
-import com.didactilab.jsjvm.client.classfile.Attributes;
 import com.didactilab.jsjvm.client.classfile.OpCodeData;
 import com.didactilab.jsjvm.client.classfile.attribute.LocalVariableTable.Variable;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;
@@ -29,7 +27,8 @@ public class Code extends Attribute {
 			this.startPc = reader.readUInt16();
 			this.endPc = reader.readUInt16();
 			this.handlerPc = reader.readUInt16();
-			this.catchType = constants.get(reader.readUInt16(), ClassConstant.class);
+			int catchTypeIndex = reader.readUInt16();
+			this.catchType = catchTypeIndex != 0 ? constants.get(catchTypeIndex, ClassConstant.class) : null;
 		}
 		
 	}
@@ -267,7 +266,7 @@ public class Code extends Attribute {
 			printer.println("ExceptionTable :");
 			for (Exception ex : exceptionTable) {
 				printer.println("  from ", labels.get(ex.startPc), " to ", labels.get(ex.endPc), " => ", 
-						labels.get(ex.handlerPc), " for ", ex.catchType);
+						labels.get(ex.handlerPc), " for ", ex.catchType != null ? ex.catchType : "*");
 			}
 		}
 		

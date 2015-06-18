@@ -1,14 +1,10 @@
-package com.didactilab.jsjvm.client.classfile;
+package com.didactilab.jsjvm.client.classfile.attribute;
 
 import java.io.IOException;
 import java.util.HashMap;
 
 import com.didactilab.jsjvm.client.Factory;
-import com.didactilab.jsjvm.client.classfile.attribute.Code;
-import com.didactilab.jsjvm.client.classfile.attribute.ConstantValue;
-import com.didactilab.jsjvm.client.classfile.attribute.LineNumberTable;
-import com.didactilab.jsjvm.client.classfile.attribute.LocalVariableTable;
-import com.didactilab.jsjvm.client.classfile.attribute.SourceFile;
+import com.didactilab.jsjvm.client.classfile.UnknownAttribute;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
@@ -21,10 +17,15 @@ public class Attributes {
 	
 	static {
 		factory(SourceFile.NAME, SourceFile.FACTORY);
+		factory(Signature.NAME, Signature.FACTORY);
+		factory(Exceptions.NAME, Exceptions.FACTORY);
 		factory(Code.NAME, Code.FACTORY);
 		factory(LineNumberTable.NAME, LineNumberTable.FACTORY);
 		factory(LocalVariableTable.NAME, LocalVariableTable.FACTORY);
 		factory(ConstantValue.NAME, ConstantValue.FACTORY);
+		factory(Deprecated.NAME, Deprecated.FACTORY);
+		factory(InnerClasses.NAME, InnerClasses.FACTORY);
+		factory(RuntimeVisibleAnnotations.NAME, RuntimeVisibleAnnotations.FACTORY);
 	}
 	
 	private static void factory(String name, Factory<Attribute> factory) {

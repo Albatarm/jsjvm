@@ -2,6 +2,7 @@ package com.didactilab.jsjvm.client.classfile;
 
 import java.io.IOException;
 
+import com.didactilab.jsjvm.client.classfile.attribute.Attributes;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;

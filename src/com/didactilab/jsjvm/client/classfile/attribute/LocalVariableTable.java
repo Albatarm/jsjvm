@@ -3,7 +3,6 @@ package com.didactilab.jsjvm.client.classfile.attribute;
 import java.io.IOException;
 
 import com.didactilab.jsjvm.client.Factory;
-import com.didactilab.jsjvm.client.classfile.Attribute;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
 import com.didactilab.jsjvm.client.runtime.InvalidClassFileFormatException;
