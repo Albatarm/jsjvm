@@ -2,7 +2,6 @@ package com.didactilab.jsjvm.client.classfile.attribute;
 
 import java.io.IOException;
 
-import com.didactilab.jsjvm.client.Factory;
 import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.Printer;
@@ -24,6 +23,11 @@ public abstract class AbstractLocalVariableTable extends Attribute {
 			this.name = name;
 			this.descriptor = descriptor;
 			this.index = index;
+		}
+		
+		@Override
+		public String toString() {
+			return index + " => " + "[" + startPc + ".." + (startPc + length) + "[ " + descriptor + " " + name;
 		}
 		
 	}
@@ -53,7 +57,7 @@ public abstract class AbstractLocalVariableTable extends Attribute {
 	@Override
 	public void print(Printer printer) {
 		for (Variable var : variables) {
-			printer.println(var.descriptor, " ", var.name);
+			printer.println(var);
 		}
 	}
 	
@@ -67,6 +71,20 @@ public abstract class AbstractLocalVariableTable extends Attribute {
 			}
 		}
 		return null;
+	}
+	
+	public Variable getOnlyVariableAt(int index) {
+		Variable found = null;
+		for (Variable var : variables) {
+			if (var.index == index) {
+				if (found == null) {
+					found = var;
+				} else {
+					return null;
+				}
+			}
+		}
+		return found;
 	}
 
 }

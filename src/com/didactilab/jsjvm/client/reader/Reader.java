@@ -16,6 +16,7 @@ public interface Reader {
 	long readUInt32() throws IOException;
 	short readUInt8() throws IOException;
 	byte[] readBytes(int length) throws IOException;
+	byte[] readBytes(long length) throws IOException;
 	
 	void skip(int bytes) throws IOException;
 	

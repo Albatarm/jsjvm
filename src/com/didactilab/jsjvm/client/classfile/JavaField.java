@@ -16,5 +16,10 @@ public class JavaField extends JavaMember {
 	protected String getMemberTypeName() {
 		return "field";
 	}
+	
+	@Override
+	public String toString() {
+		return getDescriptor() + " " + getName();
+	}
 
 }

@@ -34,6 +34,7 @@ public class Attributes {
 		factory(Synthetic.NAME, Synthetic.FACTORY);
 		factory(MethodParameters.NAME, MethodParameters.FACTORY);
 		factory(AnnotationDefault.NAME, AnnotationDefault.FACTORY);
+		factory(SourceDebugExtension.NAME, SourceDebugExtension.FACTORY);
 	}
 	
 	private static void factory(String name, Factory<Attribute> factory) {

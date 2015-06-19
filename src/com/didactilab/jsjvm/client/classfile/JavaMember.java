@@ -35,7 +35,7 @@ public abstract class JavaMember {
 	}
 	
 	public void print(Printer printer) {
-		printer.println(getMemberTypeName(), " ", name, ":", descriptor);
+		printer.println(getMemberTypeName(), " ", toString());
 		if (!attributes.isEmpty()) {
 			attributes.print(new IndentedPrinter(printer, "   "));
 		}
@@ -44,5 +44,25 @@ public abstract class JavaMember {
 	
 	protected abstract int getAllowedAccessFlagsMask();
 	protected abstract String getMemberTypeName();
+	
+	public Attributes getAttributes() {
+		return attributes;
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public JavaClass getJavaClass() {
+		return javaClass;
+	}
+	
+	public int getAccessFlags() {
+		return accessFlags;
+	}
+	
+	public String getDescriptor() {
+		return descriptor;
+	}
 	
 }

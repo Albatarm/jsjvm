@@ -97,6 +97,11 @@ public class FileReader implements Reader {
 	}
 	
 	@Override
+	public byte[] readBytes(long length) throws IOException {
+		return readBytes((int) length);
+	}
+	
+	@Override
 	public void skip(int bytes) throws IOException {
 		stream.skipBytes(bytes);
 	}

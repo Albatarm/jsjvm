@@ -6,14 +6,21 @@ import java.io.IOException;
 import com.didactilab.jsjvm.client.classfile.attribute.Attributes;
 import com.didactilab.jsjvm.client.classfile.constant.ClassConstant;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
+import com.didactilab.jsjvm.client.debug.IndentedPrinter;
+import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.debug.SystemPrinter;
 import com.didactilab.jsjvm.client.reader.FileReader;
 import com.didactilab.jsjvm.client.reader.Reader;
 
 public class JavaClass {
 
+	private static final int MAGIC = 0xCAFEBABE;
+	
 	private Reader reader;
 	private ConstantPool constantPool = new ConstantPool();
+	
+	private int minorVersion;
+	private int majorVersion;
 	
 	private int flags;
 	private ClassConstant thisClass;
@@ -41,14 +48,12 @@ public class JavaClass {
 	
 	private void readHeader() throws InvalidClassFileFormatException, IOException {
 		long magic = reader.readUInt32();
-		int minorVersion = reader.readUInt16();
-		int majorVersion = reader.readUInt16();
+		minorVersion = reader.readUInt16();
+		majorVersion = reader.readUInt16();
 		
-		if (magic != 0xCAFEBABE) {
+		if (magic != MAGIC) {
 			throw new InvalidClassFileFormatException("Not a CAFEBABE java class file");
 		}
-		System.out.println("major : " + majorVersion);
-		System.out.println("minor : " + minorVersion);
 		
 		constantPool.read(reader);
 		
@@ -59,14 +64,10 @@ public class JavaClass {
 		thisClass = constantPool.get(thisIndex, ClassConstant.class);
 		superClass = constantPool.get(superIndex, ClassConstant.class);
 		
-		System.out.println("this : " + thisClass);
-		System.out.println("super : " + superClass);
-		
 		int interfaceLength = reader.readUInt16();
 		interfaces = new ClassConstant[interfaceLength];
 		for (int i = 0; i < interfaceLength; i++) {
 			interfaces[i] = constantPool.get(reader.readUInt16(), ClassConstant.class);
-			System.out.println("interface " + interfaces[i]);
 		}
 		
 		int fieldCount = reader.readUInt16();
@@ -75,7 +76,6 @@ public class JavaClass {
 			JavaField field = new JavaField(this);
 			field.read(reader);
 			fields[i] = field;
-			field.print(new SystemPrinter());
 		}
 		
 		int methodCount = reader.readUInt16();
@@ -84,16 +84,43 @@ public class JavaClass {
 			JavaMethod method = new JavaMethod(this);
 			method.read(reader);
 			methods[i] = method;
-			method.print(new SystemPrinter());
 		}
 		
 		attributes.read(reader);
-		attributes.print(new SystemPrinter());
+	}
+	
+	public void print(Printer printer) {
+		printer.println("version ", JavaVersion.valueOf(majorVersion), " minor ", minorVersion);
+		printer.print("class ", thisClass.getName(), " extends ", superClass.getName());
+		if (interfaces.length != 0) {
+			printer.print(" implements");
+			for (ClassConstant inf : interfaces) {
+				printer.print(" " + inf.getName());
+			}
+		} 
+		printer.println();
+		Printer p = new IndentedPrinter(printer, "  ");
+		for (JavaField field : fields) {
+			field.print(p);
+		}
+		for (JavaMethod method : methods) {
+			method.print(p);
+		}
+		attributes.print(p);
 		
 	}
 	
 	public ConstantPool getConstantPool() {
 		return constantPool;
+	}
+	
+	public JavaMethod findMethod(String name, String descriptor) {
+		for (JavaMethod method : methods) {
+			if (method.getName().equals(name) && method.getDescriptor().equals(descriptor)) {
+				return method;
+			}
+		}
+		return null;
 	}
 	
 	public static void main(String[] args) throws IOException {
@@ -104,6 +131,7 @@ public class JavaClass {
 				FileReader reader = new FileReader(file.toString());
 				JavaClass classFileReader = new JavaClass(reader);
 				classFileReader.read();
+				classFileReader.print(new SystemPrinter());
 			}
 		}
 		

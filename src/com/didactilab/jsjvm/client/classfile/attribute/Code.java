@@ -117,7 +117,7 @@ public class Code extends Attribute {
 		maxStack = reader.readUInt16();
 		maxLocals = reader.readUInt16();
 		long codeSize = reader.readUInt32();
-		code = reader.readBytes((int) codeSize);
+		code = reader.readBytes(codeSize);
 		int exceptionTableLength = reader.readUInt16();
 		exceptionTable = new Exception[exceptionTableLength];
 		for (int i = 0; i < exceptionTableLength; i++) {
@@ -276,4 +276,8 @@ public class Code extends Attribute {
 		
 	}
 
+	public Attributes getAttributes() {
+		return attributes;
+	}
+	
 }

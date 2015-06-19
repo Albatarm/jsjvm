@@ -85,6 +85,11 @@ public class DataViewReader implements Reader {
 	}
 	
 	@Override
+	public byte[] readBytes(long length) throws IOException {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
 	public void skip(int bytes) throws IOException {
 		pos += bytes;
 	}
