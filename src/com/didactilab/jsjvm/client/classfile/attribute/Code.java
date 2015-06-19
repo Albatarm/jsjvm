@@ -7,7 +7,7 @@ import java.util.HashMap;
 import com.didactilab.jsjvm.client.Factory;
 import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
 import com.didactilab.jsjvm.client.classfile.OpCodeData;
-import com.didactilab.jsjvm.client.classfile.attribute.LocalVariableTable.Variable;
+import com.didactilab.jsjvm.client.classfile.attribute.AbstractLocalVariableTable.Variable;
 import com.didactilab.jsjvm.client.classfile.constant.ClassConstant;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;

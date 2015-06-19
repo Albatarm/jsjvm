@@ -36,7 +36,9 @@ public abstract class JavaMember {
 	
 	public void print(Printer printer) {
 		printer.println(getMemberTypeName(), " ", name, ":", descriptor);
-		attributes.print(new IndentedPrinter(printer, "   "));
+		if (!attributes.isEmpty()) {
+			attributes.print(new IndentedPrinter(printer, "   "));
+		}
 		
 	}
 	

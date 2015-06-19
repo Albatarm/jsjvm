@@ -19,14 +19,14 @@ public class ConstantPool {
 	public void read(Reader reader) throws InvalidClassFileFormatException, IOException {
 		int count = reader.readUInt16();
 		
-		LOGGER.info("Constant pool with " + count + " constants");
+		//LOGGER.info("Constant pool with " + count + " constants");
 		
 		list = new Object[count - 1];
 		for (int i=1; i<count; i++) {
 			int type = reader.readUInt8();
 			int delta = 0;
 			
-			LOGGER.info("read constant " + i + " => " + type);
+			//LOGGER.info("read constant " + i + " => " + type);
 			
 			Object constant;
 			switch (type) {
@@ -54,12 +54,10 @@ public class ConstantPool {
 				case Constant.CONSTANT_LONG: 
 					constant = readLong(reader); 
 					delta = 1;
-					System.err.println("i++");
 					break;
 				case Constant.CONSTANT_DOUBLE: 
 					constant = readDouble(reader); 
 					delta = 1;
-					System.err.println("i++");
 					break;
 				case Constant.CONSTANT_NAMEANDTYPE: 
 					constant = new NameAndTypeConstant(this, reader); 
@@ -82,13 +80,13 @@ public class ConstantPool {
 			i += delta;
 		}
 		
-		if (LOGGER.isLoggable(Level.INFO)) {
+		/*if (LOGGER.isLoggable(Level.INFO)) {
 			for (int i=0, c=list.length; i<c; i++) {
 				if (list[i] != null) {
 					System.out.println("constant " + (i+1) + " : " + list[i]);
 				}
 			}
-		}
+		}*/
 	}
 	
 	public <T> T get(int index, Class<T> constantClass) {

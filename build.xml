@@ -11,9 +11,10 @@
 	
 	<target name="build-rt" description="Build runtime">
 		<mkdir dir="${build.runtime}" />
-		<javac srcdir="${runtime.source}" destdir="${build.runtime}" target="1.8"  
+		<javac destdir="${build.runtime}" target="1.8" includeJavaRuntime="true" 
 			includeantruntime="false" debug="true">
-			<include name="java/lang/String.java"/>
+			<src path="${runtime.source}/java/lang" />
+			<include name="String.java" />
 		</javac>
 	</target>
 

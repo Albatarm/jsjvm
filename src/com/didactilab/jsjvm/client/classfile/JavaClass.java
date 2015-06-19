@@ -97,14 +97,21 @@ public class JavaClass {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		File file = new File(".");
-		file = file.getAbsoluteFile();
-		System.out.println(file.toString());
-		String filename = "test/String.class";
+		File dir = new File("build/runtime/java/lang");
+		File[] files = dir.listFiles();
+		for (File file : files) {
+			if (file.toString().endsWith(".class")) {
+				FileReader reader = new FileReader(file.toString());
+				JavaClass classFileReader = new JavaClass(reader);
+				classFileReader.read();
+			}
+		}
+		
+		/*String filename = "build/runtime/java/lang/String.class";
 		FileReader reader = new FileReader(filename);
 		
 		JavaClass classFileReader = new JavaClass(reader);
-		classFileReader.read();
+		classFileReader.read();*/
 		
 		//
 		System.out.println();

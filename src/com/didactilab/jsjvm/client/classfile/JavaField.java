@@ -17,6 +17,4 @@ public class JavaField extends JavaMember {
 		return "field";
 	}
 
-	
-	
 }

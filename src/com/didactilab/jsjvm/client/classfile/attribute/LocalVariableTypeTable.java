@@ -2,18 +2,18 @@ package com.didactilab.jsjvm.client.classfile.attribute;
 
 import com.didactilab.jsjvm.client.Factory;
 
-public class LocalVariableTable extends AbstractLocalVariableTable {
-
-	public static final String NAME = "LocalVariableTable";
+public class LocalVariableTypeTable extends AbstractLocalVariableTable {
+	
+	public static final String NAME = "LocalVariableTypeTable";
 	
 	public static final Factory<Attribute> FACTORY = new Factory<Attribute>() {
 		@Override
 		public Attribute create() {
-			return new LocalVariableTable();
+			return new LocalVariableTypeTable();
 		}
 	};
 	
-	public LocalVariableTable() {
+	public LocalVariableTypeTable() {
 		super(NAME);
 	}
 

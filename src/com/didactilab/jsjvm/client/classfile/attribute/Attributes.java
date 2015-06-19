@@ -22,10 +22,18 @@ public class Attributes {
 		factory(Code.NAME, Code.FACTORY);
 		factory(LineNumberTable.NAME, LineNumberTable.FACTORY);
 		factory(LocalVariableTable.NAME, LocalVariableTable.FACTORY);
+		factory(LocalVariableTypeTable.NAME, LocalVariableTypeTable.FACTORY);
 		factory(ConstantValue.NAME, ConstantValue.FACTORY);
 		factory(Deprecated.NAME, Deprecated.FACTORY);
 		factory(InnerClasses.NAME, InnerClasses.FACTORY);
 		factory(RuntimeVisibleAnnotations.NAME, RuntimeVisibleAnnotations.FACTORY);
+		factory(RuntimeInvisibleAnnotations.NAME, RuntimeInvisibleAnnotations.FACTORY);
+		factory(RuntimeVisibleParameterAnnotations.NAME, RuntimeVisibleParameterAnnotations.FACTORY);
+		factory(RuntimeInvisibleParameterAnnotations.NAME, RuntimeInvisibleParameterAnnotations.FACTORY);
+		factory(EnclosingMethod.NAME, EnclosingMethod.FACTORY);
+		factory(Synthetic.NAME, Synthetic.FACTORY);
+		factory(MethodParameters.NAME, MethodParameters.FACTORY);
+		factory(AnnotationDefault.NAME, AnnotationDefault.FACTORY);
 	}
 	
 	private static void factory(String name, Factory<Attribute> factory) {
