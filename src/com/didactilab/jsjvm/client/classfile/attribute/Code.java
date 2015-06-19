@@ -280,4 +280,8 @@ public class Code extends Attribute {
 		return attributes;
 	}
 	
+	public byte[] getCode() {
+		return code;
+	}
+	
 }

@@ -72,7 +72,7 @@ public class JavaMethod extends JavaMember {
 		return returnType;
 	}
 	
-	protected Code getCode() {
+	public Code getCodeAttribute() {
 		if (code == null) {
 			code = getAttributes().get(Code.NAME, Code.class);
 			if (code == null) {
@@ -83,7 +83,7 @@ public class JavaMethod extends JavaMember {
 	}
 	
 	private void initParameters() {
-		LocalVariableTable varTable = getCode().getAttributes().get(LocalVariableTable.NAME, LocalVariableTable.class);
+		LocalVariableTable varTable = getCodeAttribute().getAttributes().get(LocalVariableTable.NAME, LocalVariableTable.class);
 		if (varTable == null) {
 			StringPrinter s = new StringPrinter();
 			getAttributes().print(s);
