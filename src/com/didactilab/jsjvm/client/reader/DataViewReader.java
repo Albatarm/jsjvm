@@ -93,5 +93,9 @@ public class DataViewReader implements Reader {
 	public void skip(int bytes) throws IOException {
 		pos += bytes;
 	}
+	
+	@Override
+	public void close() {
+	}
 
 }

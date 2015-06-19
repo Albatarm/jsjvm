@@ -20,4 +20,6 @@ public interface Reader {
 	
 	void skip(int bytes) throws IOException;
 	
+	void close();
+	
 }

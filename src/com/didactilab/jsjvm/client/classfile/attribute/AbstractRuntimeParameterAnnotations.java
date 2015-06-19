@@ -3,7 +3,7 @@ package com.didactilab.jsjvm.client.classfile.attribute;
 import java.io.IOException;
 
 import com.didactilab.jsjvm.client.Joiner;
-import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
+import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.classfile.attribute.AbstractRuntimeAnnotations.Annotation;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.Printer;
@@ -15,7 +15,7 @@ public class AbstractRuntimeParameterAnnotations extends Attribute {
 		public final Annotation[] annotations;
 		
 		public Parameter(ConstantPool constants, Reader reader) throws IOException,
-				InvalidClassFileFormatException {
+				ClassFormatException {
 			int len = reader.readUInt16();
 			annotations = new Annotation[len];
 			for (int i = 0; i < len; i++) {
@@ -37,7 +37,7 @@ public class AbstractRuntimeParameterAnnotations extends Attribute {
 	
 	@Override
 	public void read(ConstantPool constants, Reader reader) throws IOException,
-			InvalidClassFileFormatException {
+			ClassFormatException {
 		super.read(constants, reader);
 		int len = reader.readUInt16();
 		parameters = new Parameter[len];

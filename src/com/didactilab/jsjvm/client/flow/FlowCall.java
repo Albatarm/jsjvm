@@ -2,15 +2,19 @@ package com.didactilab.jsjvm.client.flow;
 
 import java.util.List;
 
-import com.didactilab.jsjvm.client.classfile.constant.MethodRefConstant;
+import com.didactilab.jsjvm.client.classfile.JavaMethod;
 
 public class FlowCall implements FlowObject {
 
-	private MethodRefConstant method;
-	private FlowObject instance;
-	private List<FlowObject> parameters;
+	private final JavaMethod method;
+	private final FlowObject instance;
+	private final List<FlowObject> parameters;
 
-	public FlowCall(MethodRefConstant method, FlowObject instance, List<FlowObject> parameters) {
+	public FlowCall(JavaMethod method, List<FlowObject> parameters) {
+		this(method, null, parameters);
+	}
+	
+	public FlowCall(JavaMethod method, FlowObject instance, List<FlowObject> parameters) {
 		this.method = method;
 		this.instance = instance;
 		this.parameters = parameters;
@@ -25,7 +29,12 @@ public class FlowCall implements FlowObject {
 	@Override
 	public String toSource() {
 		SourceBuilder sb = new SourceBuilder();
-		sb.append(instance).append(".").append(method.getNameAndType().getName());
+		if (method.isStatic()) {
+			sb.append(method.getJavaClass().getJavaName());
+		} else {
+			sb.append(instance);
+		}
+		sb.append(".").append(method.getName());
 		sb.append("(");
 		sb.appendJoin(", ", parameters);
 		sb.append(")");

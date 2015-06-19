@@ -22,16 +22,20 @@ public abstract class JavaMember {
 		attributes = new Attributes(javaClass.getConstantPool());
 	}
 	
-	public void read(Reader reader) throws IOException, InvalidClassFileFormatException {
+	public void read(Reader reader) throws IOException, ClassFormatException {
 		accessFlags = reader.readUInt16();
 		
 		if ((accessFlags & getAllowedAccessFlagsMask()) != accessFlags) {
-			throw new InvalidClassFileFormatException("The access flags of a " + getMemberTypeName() + " is not valid : " + Integer.toHexString(accessFlags));
+			throw new ClassFormatException("The access flags of a " + getMemberTypeName() + " is not valid : " + Integer.toHexString(accessFlags));
 		}
 		
 		name = javaClass.getConstantPool().getString(reader.readUInt16());
 		descriptor = javaClass.getConstantPool().getString(reader.readUInt16());
 		attributes.read(reader);
+		afterRead();
+	}
+	
+	protected void afterRead() {
 	}
 	
 	public void print(Printer printer) {

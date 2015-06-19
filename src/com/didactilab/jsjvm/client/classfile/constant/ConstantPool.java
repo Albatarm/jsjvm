@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
+import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.reader.Reader;
 import com.didactilab.jsjvm.client.runtime.string.StringHashTable;
 
@@ -16,7 +16,7 @@ public class ConstantPool {
 	
 	private Object[] list;
 	
-	public void read(Reader reader) throws InvalidClassFileFormatException, IOException {
+	public void read(Reader reader) throws ClassFormatException, IOException {
 		int count = reader.readUInt16();
 		
 		//LOGGER.info("Constant pool with " + count + " constants");
@@ -74,7 +74,7 @@ public class ConstantPool {
 				case Constant.CONSTANT_INVOKEDYNAMIC: 
 					constant = new InvokeDynamicConstant(this, reader); 
 					break;
-				default: throw new InvalidClassFileFormatException("constant not recognized : " + type);
+				default: throw new ClassFormatException("constant not recognized : " + type);
 			}
 			list[i-1] = constant;
 			i += delta;

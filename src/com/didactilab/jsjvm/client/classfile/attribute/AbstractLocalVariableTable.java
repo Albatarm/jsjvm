@@ -2,7 +2,7 @@ package com.didactilab.jsjvm.client.classfile.attribute;
 
 import java.io.IOException;
 
-import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
+import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
@@ -40,7 +40,7 @@ public abstract class AbstractLocalVariableTable extends Attribute {
 
 	@Override
 	public void read(ConstantPool constants, Reader reader) throws IOException,
-			InvalidClassFileFormatException {
+			ClassFormatException {
 		super.read(constants, reader);
 		int lengthVariableTable = reader.readUInt16();
 		variables = new Variable[lengthVariableTable];

@@ -9,14 +9,16 @@ import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.debug.SystemPrinter;
-import com.didactilab.jsjvm.client.reader.FileReader;
+import com.didactilab.jsjvm.client.loader.JRESystemJavaClassLoader;
+import com.didactilab.jsjvm.client.loader.JavaClassLoader;
 import com.didactilab.jsjvm.client.reader.Reader;
 
 public class JavaClass {
 
 	private static final int MAGIC = 0xCAFEBABE;
 	
-	private Reader reader;
+	private final JavaClassLoader classLoader;
+	
 	private ConstantPool constantPool = new ConstantPool();
 	
 	private int minorVersion;
@@ -32,27 +34,27 @@ public class JavaClass {
 	
 	private final Attributes attributes;
 	
-	public JavaClass(Reader reader) {
-		this.reader = reader;
+	public JavaClass(JavaClassLoader classLoader) {
+		this.classLoader = classLoader;
 		attributes = new Attributes(constantPool);
 	}
 	
-	public void read() throws IOException {
+	public void read(Reader reader) throws IOException {
 		try {
-			readHeader();
-		} catch (InvalidClassFileFormatException e) {
+			readHeader(reader);
+		} catch (ClassFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 	
-	private void readHeader() throws InvalidClassFileFormatException, IOException {
+	private void readHeader(Reader reader) throws ClassFormatException, IOException {
 		long magic = reader.readUInt32();
 		minorVersion = reader.readUInt16();
 		majorVersion = reader.readUInt16();
 		
 		if (magic != MAGIC) {
-			throw new InvalidClassFileFormatException("Not a CAFEBABE java class file");
+			throw new ClassFormatException("Not a CAFEBABE java class file");
 		}
 		
 		constantPool.read(reader);
@@ -123,27 +125,38 @@ public class JavaClass {
 		return null;
 	}
 	
-	public static void main(String[] args) throws IOException {
-		File dir = new File("build/runtime/java/lang");
-		File[] files = dir.listFiles();
-		for (File file : files) {
-			if (file.toString().endsWith(".class")) {
-				FileReader reader = new FileReader(file.toString());
-				JavaClass classFileReader = new JavaClass(reader);
-				classFileReader.read();
-				classFileReader.print(new SystemPrinter());
+	public JavaField getField(String name) {
+		for (JavaField field : fields) {
+			if (field.getName().equals(name)) {
+				return field;
 			}
 		}
+		return null;
+	}
+	
+	public JavaClassLoader getClassLoader() {
+		return classLoader;
+	}
+	
+	public String getName() {
+		return thisClass.getName();
+	}
+	
+	public String getJavaName() {
+		return thisClass.getName().replace('/', '.');
+	}
+	
+	public static void main(String[] args) throws IOException {
+		JRESystemJavaClassLoader classLoader = new JRESystemJavaClassLoader(new File("build/runtime"));
+		try {
+			JavaClass clazz = classLoader.loadClass("java/lang/String");
+			clazz.print(new SystemPrinter());
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		/*String filename = "build/runtime/java/lang/String.class";
-		FileReader reader = new FileReader(filename);
-		
-		JavaClass classFileReader = new JavaClass(reader);
-		classFileReader.read();*/
-		
-		//
-		System.out.println();
-		System.out.println(UnknownAttribute.UNKNOWN_ATTRIBUTES);
+		System.out.println("\nUnknown attributes : " + UnknownAttribute.UNKNOWN_ATTRIBUTES);
 		
 	}
 	

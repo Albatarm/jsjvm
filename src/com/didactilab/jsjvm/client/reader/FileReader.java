@@ -1,7 +1,9 @@
 package com.didactilab.jsjvm.client.reader;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,8 +13,8 @@ public class FileReader implements Reader {
 	private DataInputStream stream;
 	private int pos = 0;
 	
-	public FileReader(String filename) throws FileNotFoundException {
-		stream = new DataInputStream(new FileInputStream(filename));
+	public FileReader(File file) throws FileNotFoundException {
+		stream = new DataInputStream(new BufferedInputStream(new FileInputStream(file)));
 	}
 	
 	@Override
@@ -104,6 +106,14 @@ public class FileReader implements Reader {
 	@Override
 	public void skip(int bytes) throws IOException {
 		stream.skipBytes(bytes);
+	}
+	
+	@Override
+	public void close() {
+		try {
+			stream.close();
+		} catch (IOException e) {
+		}
 	}
 
 }

@@ -15,6 +15,7 @@
 			includeantruntime="false" debug="true">
 			<src path="${runtime.source}/java/lang" />
 			<include name="String.java" />
+			<include name="System.java" />
 		</javac>
 	</target>
 

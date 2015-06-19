@@ -11,4 +11,8 @@ public class PrimitiveType extends Type {
 	public String getDescriptor() {
 		return String.valueOf(type);
 	}
+	
+	public String getTypeName() {
+		return String.valueOf(type);
+	}
 }

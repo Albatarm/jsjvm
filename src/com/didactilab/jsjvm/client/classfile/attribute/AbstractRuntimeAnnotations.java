@@ -3,7 +3,7 @@ package com.didactilab.jsjvm.client.classfile.attribute;
 import java.io.IOException;
 
 import com.didactilab.jsjvm.client.Joiner;
-import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
+import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
@@ -12,7 +12,7 @@ public abstract class AbstractRuntimeAnnotations extends Attribute {
 	
 	public static class ElementValue {
 		
-		public static ElementValue read(Reader reader, ConstantPool constants) throws IOException, InvalidClassFileFormatException {
+		public static ElementValue read(Reader reader, ConstantPool constants) throws IOException, ClassFormatException {
 			char tag = (char) reader.readUInt8();
 			switch (tag) {
 				case 'B':
@@ -34,7 +34,7 @@ public abstract class AbstractRuntimeAnnotations extends Attribute {
 				case '[':
 					return new ArrayElementValue(reader, constants);
 				default:
-					throw new InvalidClassFileFormatException("Invalid tag '" + tag + "' of element value");
+					throw new ClassFormatException("Invalid tag '" + tag + "' of element value");
 			}
 		}
 		
@@ -43,7 +43,7 @@ public abstract class AbstractRuntimeAnnotations extends Attribute {
 	public static class ConstElementValue extends ElementValue {
 		public final Object value;
 		
-		ConstElementValue(Reader reader, ConstantPool constants) throws IOException, InvalidClassFileFormatException {
+		ConstElementValue(Reader reader, ConstantPool constants) throws IOException, ClassFormatException {
 			value = constants.get(reader.readUInt16(), Object.class);
 		}
 		
@@ -57,7 +57,7 @@ public abstract class AbstractRuntimeAnnotations extends Attribute {
 		public final String typeName;
 		public final String constName;
 		
-		EnumConstElementValue(Reader reader, ConstantPool constants) throws IOException, InvalidClassFileFormatException {
+		EnumConstElementValue(Reader reader, ConstantPool constants) throws IOException, ClassFormatException {
 			typeName = constants.getString(reader.readUInt16());
 			constName = constants.getString(reader.readUInt16());
 		}
@@ -71,7 +71,7 @@ public abstract class AbstractRuntimeAnnotations extends Attribute {
 	public static class ClassElementValue extends ElementValue {
 		public final String descriptor;
 		
-		ClassElementValue(Reader reader, ConstantPool constants) throws IOException, InvalidClassFileFormatException {
+		ClassElementValue(Reader reader, ConstantPool constants) throws IOException, ClassFormatException {
 			descriptor = constants.getString(reader.readUInt16());
 		}
 		
@@ -84,7 +84,7 @@ public abstract class AbstractRuntimeAnnotations extends Attribute {
 	public static class AnnotationElementValue extends ElementValue {
 		public final Annotation annotation;
 		
-		AnnotationElementValue(Reader reader, ConstantPool constants) throws IOException, InvalidClassFileFormatException {
+		AnnotationElementValue(Reader reader, ConstantPool constants) throws IOException, ClassFormatException {
 			annotation = new Annotation(reader, constants);
 		}
 		
@@ -97,7 +97,7 @@ public abstract class AbstractRuntimeAnnotations extends Attribute {
 	public static class ArrayElementValue extends ElementValue {
 		public final ElementValue[] values;
 		
-		ArrayElementValue(Reader reader, ConstantPool constants) throws IOException, InvalidClassFileFormatException {
+		ArrayElementValue(Reader reader, ConstantPool constants) throws IOException, ClassFormatException {
 			int len = reader.readUInt16();
 			values = new ElementValue[len];
 			for (int i = 0; i < len; i++) {
@@ -110,7 +110,7 @@ public abstract class AbstractRuntimeAnnotations extends Attribute {
 		public final String name;
 		public final ElementValue value;
 		
-		public Element(Reader reader, ConstantPool constants) throws IOException, InvalidClassFileFormatException {
+		public Element(Reader reader, ConstantPool constants) throws IOException, ClassFormatException {
 			name = constants.getString(reader.readUInt16());
 			value = ElementValue.read(reader, constants);
 		}
@@ -125,7 +125,7 @@ public abstract class AbstractRuntimeAnnotations extends Attribute {
 		public final String type;
 		public final Element[] elements;
 		
-		public Annotation(Reader reader, ConstantPool constants) throws IOException, InvalidClassFileFormatException {
+		public Annotation(Reader reader, ConstantPool constants) throws IOException, ClassFormatException {
 			int index = reader.readUInt16();
 			type = constants.getString(index);
 			int length = reader.readUInt16();
@@ -149,7 +149,7 @@ public abstract class AbstractRuntimeAnnotations extends Attribute {
 	
 	@Override
 	public void read(ConstantPool constants, Reader reader) throws IOException,
-			InvalidClassFileFormatException {
+			ClassFormatException {
 		super.read(constants, reader);
 		int len = reader.readUInt16();
 		annotations = new Annotation[len];

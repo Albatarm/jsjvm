@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import com.didactilab.jsjvm.client.Factory;
 import com.didactilab.jsjvm.client.classfile.AccessFlags;
-import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
+import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.classfile.attribute.InnerClasses.InnerClass;
 import com.didactilab.jsjvm.client.classfile.constant.ClassConstant;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
@@ -59,7 +59,7 @@ public class InnerClasses extends AbstractListAttribute<InnerClass> {
 	
 	@Override
 	public void read(ConstantPool constants, Reader reader) throws IOException,
-			InvalidClassFileFormatException {
+			ClassFormatException {
 		super.read(constants, reader);
 		int length = reader.readUInt16();
 		classes = new InnerClass[length];
@@ -69,7 +69,7 @@ public class InnerClasses extends AbstractListAttribute<InnerClass> {
 			int nameIndex = reader.readInt16();
 			int accessFlags = reader.readUInt16();
 			if ((accessFlags & AccessFlags.ACC_INNERCLASS) != accessFlags) {
-				throw new InvalidClassFileFormatException("Invalid access flags for an inner class");
+				throw new ClassFormatException("Invalid access flags for an inner class");
 			}
 			classes[i] = new InnerClass(constants.get(innerClassIndex, ClassConstant.class),
 					outerClassIndex != 0 ? constants.get(outerClassIndex, ClassConstant.class) : null,

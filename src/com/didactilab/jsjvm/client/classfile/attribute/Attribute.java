@@ -2,7 +2,7 @@ package com.didactilab.jsjvm.client.classfile.attribute;
 
 import java.io.IOException;
 
-import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
+import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
@@ -26,7 +26,7 @@ public abstract class Attribute {
 	
 	public abstract void print(Printer printer);
 	
-	public void read(ConstantPool constants, Reader reader) throws IOException, InvalidClassFileFormatException {
+	public void read(ConstantPool constants, Reader reader) throws IOException, ClassFormatException {
 		size = reader.readUInt32();
 	}
 	

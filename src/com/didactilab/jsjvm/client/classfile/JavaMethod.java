@@ -1,27 +1,37 @@
 package com.didactilab.jsjvm.client.classfile;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.didactilab.jsjvm.client.classfile.attribute.AbstractLocalVariableTable.Variable;
 import com.didactilab.jsjvm.client.classfile.attribute.Code;
 import com.didactilab.jsjvm.client.classfile.attribute.LocalVariableTable;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescriptorParser;
 import com.didactilab.jsjvm.client.classfile.descriptor.Type;
-import com.didactilab.jsjvm.client.debug.StringPrinter;
 
 public class JavaMethod extends JavaMember {
 	
 	public static class Parameter {
+		public final int index;
 		public final String name;
 		public final Type type;
 		
-		public Parameter(String name, Type type) {
+		public Parameter(int index, String name, Type type) {
+			this.index = index;
 			this.name = name;
 			this.type = type;
 		}
 		
 		public String getDescriptor() {
 			return type.getDescriptor();
+		}
+		
+		public int getIndex() {
+			return index;
+		}
+		
+		public Type getType() {
+			return type;
 		}
 		
 		@Override
@@ -37,6 +47,11 @@ public class JavaMethod extends JavaMember {
 
 	public JavaMethod(JavaClass javaClass) {
 		super(javaClass);
+	}
+	
+	@Override
+	protected void afterRead() {
+		code = getAttributes().get(Code.NAME, Code.class);
 	}
 
 	@Override
@@ -65,6 +80,10 @@ public class JavaMethod extends JavaMember {
 		return (getAccessFlags() & AccessFlags.ACC_STATIC) != 0;
 	}
 	
+	public boolean isConstructor() {
+		return "<init>".equals(getName());
+	}
+	
 	public Type getReturnType() {
 		if (parameters == null) {
 			initParameters();
@@ -73,35 +92,30 @@ public class JavaMethod extends JavaMember {
 	}
 	
 	public Code getCodeAttribute() {
-		if (code == null) {
-			code = getAttributes().get(Code.NAME, Code.class);
-			if (code == null) {
-				throw new IllegalArgumentException();
-			}
-		}
 		return code;
 	}
 	
+	private LocalVariableTable getCodeLocalVariableTable() {
+		Code code = getCodeAttribute();
+		return code != null ? code.getAttributes().get(LocalVariableTable.NAME, LocalVariableTable.class) : null;
+	}
+	
 	private void initParameters() {
-		LocalVariableTable varTable = getCodeAttribute().getAttributes().get(LocalVariableTable.NAME, LocalVariableTable.class);
-		if (varTable == null) {
-			StringPrinter s = new StringPrinter();
-			getAttributes().print(s);
-			throw new IllegalArgumentException(s.toString());
-		}
+		LocalVariableTable varTable = getCodeLocalVariableTable();
 		DescriptorParser parser = new DescriptorParser(getDescriptor());
 		parser.parseMethod();
 		ArrayList<Parameter> ps = new ArrayList<>();
-		for (Type type : parser.getParameters()) {
+		final List<Type> params = parser.getParameters();
+		for (int i=0, c=params.size(); i<c; i++) {
+			Type type = params.get(i);
 			String name;
 			if (varTable != null) {
-				Variable var = varTable.getOnlyVariableAt(isStatic() ? 0 : 1);
-				name = var != null ? var.name : "x" + (ps.size() + 1);
+				Variable var = varTable.getOnlyVariableAt(isStatic() ? i : i+1);
+				name = var != null ? var.name : "param" + i;
 			} else {
-				name = "p" + (ps.size() + 1);
+				name = "param" + i;
 			}
-			Parameter p = new Parameter(name, type);
-			ps.add(p);
+			ps.add(new Parameter(i, name, type));
 		}
 		parameters = ps.toArray(new Parameter[ps.size()]);
 		//

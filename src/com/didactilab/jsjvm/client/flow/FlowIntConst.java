@@ -1,10 +1,10 @@
 package com.didactilab.jsjvm.client.flow;
 
-public class FlowIntValue implements FlowObject {
+public class FlowIntConst implements FlowObject {
 
 	private final int value;
 
-	public FlowIntValue(int value) {
+	public FlowIntConst(int value) {
 		this.value = value;
 	}
 	

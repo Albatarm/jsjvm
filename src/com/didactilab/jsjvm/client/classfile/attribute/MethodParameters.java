@@ -3,7 +3,7 @@ package com.didactilab.jsjvm.client.classfile.attribute;
 import java.io.IOException;
 
 import com.didactilab.jsjvm.client.Factory;
-import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
+import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
@@ -42,7 +42,7 @@ public class MethodParameters extends Attribute {
 	
 	@Override
 	public void read(ConstantPool constants, Reader reader) throws IOException,
-			InvalidClassFileFormatException {
+			ClassFormatException {
 		super.read(constants, reader);
 		int count = reader.readUInt16();
 		parameters = new MethodParameter[count];

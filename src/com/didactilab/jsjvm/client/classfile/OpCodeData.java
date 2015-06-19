@@ -280,7 +280,7 @@ public enum OpCodeData {
 		return size;
 	}
 	
-	public static OpCodeData valueOfCode(int code) {
+	public static OpCodeData valueOf(int code) {
 		if (OPCODES == null) {
 			OPCODES = new OpCodeData[OpCode._MAX+1];
 			for (OpCodeData opCode : values()) {

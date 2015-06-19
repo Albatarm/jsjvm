@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import com.didactilab.jsjvm.client.Factory;
-import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
+import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.classfile.UnknownAttribute;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;
@@ -50,7 +50,7 @@ public class Attributes {
 		this.constants = constants;
 	}
 	
-	public void read(Reader reader) throws IOException, InvalidClassFileFormatException {
+	public void read(Reader reader) throws IOException, ClassFormatException {
 		int count = reader.readUInt16();
 		attributes = new Attribute[count];
 		for (int i = 0; i < count; i++) {

@@ -19,7 +19,7 @@ public class UnknownAttribute extends Attribute {
 	
 	@Override
 	public void read(ConstantPool constants, Reader reader) throws IOException,
-			InvalidClassFileFormatException {
+			ClassFormatException {
 		super.read(constants, reader);
 		reader.skip((int) getSize()); 
 	}

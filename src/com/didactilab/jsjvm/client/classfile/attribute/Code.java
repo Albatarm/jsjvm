@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.didactilab.jsjvm.client.Factory;
-import com.didactilab.jsjvm.client.classfile.InvalidClassFileFormatException;
+import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.classfile.OpCodeData;
 import com.didactilab.jsjvm.client.classfile.attribute.AbstractLocalVariableTable.Variable;
 import com.didactilab.jsjvm.client.classfile.constant.ClassConstant;
@@ -111,7 +111,7 @@ public class Code extends Attribute {
 	
 	@Override
 	public void read(ConstantPool constants, Reader reader) throws IOException,
-			InvalidClassFileFormatException {
+			ClassFormatException {
 		this.constants = constants;
 		super.read(constants, reader);
 		maxStack = reader.readUInt16();
@@ -142,7 +142,7 @@ public class Code extends Attribute {
 		while (pos < code.length) {
 			int oppos = pos;
 			int op = code[pos++] & 0xFF;
-			OpCodeData opCode = OpCodeData.valueOfCode(op);
+			OpCodeData opCode = OpCodeData.valueOf(op);
 			String text = opCode.name;
 			for (OpCodeData.Param param : opCode.params) {
 				switch (param) {
@@ -282,6 +282,14 @@ public class Code extends Attribute {
 	
 	public byte[] getCode() {
 		return code;
+	}
+	
+	public int getMaxLocals() {
+		return maxLocals;
+	}
+	
+	public int getMaxStack() {
+		return maxStack;
 	}
 	
 }
