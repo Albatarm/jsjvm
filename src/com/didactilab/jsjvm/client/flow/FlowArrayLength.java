@@ -1,6 +1,6 @@
 package com.didactilab.jsjvm.client.flow;
 
-public class FlowArrayLength implements FlowObject {
+public class FlowArrayLength extends AbstractFlowObject {
 
 	private final FlowObject obj;
 

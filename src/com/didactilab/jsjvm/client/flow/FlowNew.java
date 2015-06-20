@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.didactilab.jsjvm.client.classfile.JavaClass;
 
-public class FlowNew implements FlowObject {
+public class FlowNew extends AbstractFlowObject {
 
 	private final JavaClass clazz;
 	private List<FlowObject> parameters;

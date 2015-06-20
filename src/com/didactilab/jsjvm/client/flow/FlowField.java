@@ -2,7 +2,7 @@ package com.didactilab.jsjvm.client.flow;
 
 import com.didactilab.jsjvm.client.classfile.JavaField;
 
-public class FlowField implements FlowObject{
+public class FlowField extends AbstractFlowObject {
 
 	private final FlowObject instance;
 	private final JavaField field;

@@ -64,7 +64,7 @@ public class JavaClass {
 		int superIndex = reader.readUInt16();
 		
 		thisClass = constantPool.get(thisIndex, ClassConstant.class);
-		superClass = constantPool.get(superIndex, ClassConstant.class);
+		superClass = superIndex != 0 ? constantPool.get(superIndex, ClassConstant.class) : null;
 		
 		int interfaceLength = reader.readUInt16();
 		interfaces = new ClassConstant[interfaceLength];

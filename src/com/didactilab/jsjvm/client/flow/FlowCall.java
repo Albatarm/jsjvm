@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.didactilab.jsjvm.client.classfile.JavaMethod;
 
-public class FlowCall implements FlowObject {
+public class FlowCall extends AbstractFlowObject {
 
 	private final JavaMethod method;
 	private final FlowObject instance;
@@ -19,11 +19,6 @@ public class FlowCall implements FlowObject {
 		this.instance = instance;
 		this.parameters = parameters;
 		
-	}
-	
-	@Override
-	public String toString() {
-		return toSource();
 	}
 	
 	@Override

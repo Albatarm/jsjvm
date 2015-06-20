@@ -16,6 +16,9 @@
 			<src path="${runtime.source}/java/lang" />
 			<include name="String.java" />
 			<include name="System.java" />
+			<include name="StringCoding.java" />
+			<include name="NullPointerException.java" />
+			<include name="Object.java" />
 		</javac>
 	</target>
 

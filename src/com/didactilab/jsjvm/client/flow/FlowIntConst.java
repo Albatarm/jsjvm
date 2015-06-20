@@ -1,16 +1,11 @@
 package com.didactilab.jsjvm.client.flow;
 
-public class FlowIntConst implements FlowObject {
+public class FlowIntConst extends AbstractFlowObject {
 
 	private final int value;
 
 	public FlowIntConst(int value) {
 		this.value = value;
-	}
-	
-	@Override
-	public String toString() {
-		return String.valueOf(value);
 	}
 	
 	@Override
