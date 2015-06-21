@@ -1,6 +1,6 @@
 package com.didactilab.jsjvm.client.flow;
 
-public class FlowAssign implements FlowObject {
+public class FlowAssign extends AbstractFlowObject {
 
 	private final FlowObject var;
 	private final FlowObject value;

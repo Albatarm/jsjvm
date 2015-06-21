@@ -7,16 +7,16 @@ import com.didactilab.jsjvm.client.classfile.attribute.AbstractLocalVariableTabl
 import com.didactilab.jsjvm.client.classfile.attribute.Code;
 import com.didactilab.jsjvm.client.classfile.attribute.LocalVariableTable;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescriptorParser;
-import com.didactilab.jsjvm.client.classfile.descriptor.Type;
+import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
 
 public class JavaMethod extends JavaMember {
 	
 	public static class Parameter {
 		public final int index;
 		public final String name;
-		public final Type type;
+		public final DescType type;
 		
-		public Parameter(int index, String name, Type type) {
+		public Parameter(int index, String name, DescType type) {
 			this.index = index;
 			this.name = name;
 			this.type = type;
@@ -30,7 +30,7 @@ public class JavaMethod extends JavaMember {
 			return index;
 		}
 		
-		public Type getType() {
+		public DescType getType() {
 			return type;
 		}
 		
@@ -41,7 +41,7 @@ public class JavaMethod extends JavaMember {
 	}
 	
 	private Parameter[] parameters;
-	private Type returnType;
+	private DescType returnType;
 	
 	private Code code;
 
@@ -84,7 +84,7 @@ public class JavaMethod extends JavaMember {
 		return "<init>".equals(getName());
 	}
 	
-	public Type getReturnType() {
+	public DescType getReturnType() {
 		if (parameters == null) {
 			initParameters();
 		}
@@ -105,9 +105,9 @@ public class JavaMethod extends JavaMember {
 		DescriptorParser parser = new DescriptorParser(getDescriptor());
 		parser.parseMethod();
 		ArrayList<Parameter> ps = new ArrayList<>();
-		final List<Type> params = parser.getParameters();
+		final List<DescType> params = parser.getParameters();
 		for (int i=0, c=params.size(); i<c; i++) {
-			Type type = params.get(i);
+			DescType type = params.get(i);
 			String name;
 			if (varTable != null) {
 				Variable var = varTable.getOnlyVariableAt(isStatic() ? i : i+1);

@@ -5,13 +5,13 @@ import java.util.List;
 
 public class DescriptorParser {
 	
-	private final ArrayList<Type> list = new ArrayList<>();
+	private final ArrayList<DescType> list = new ArrayList<>();
 	
 	private final String descriptor;
 	private final int len;
 	private int pos = 0;
 	
-	private Type returnType;
+	private DescType returnType;
 	
 	public DescriptorParser(String descriptor) {
 		this.descriptor = descriptor;
@@ -55,7 +55,7 @@ public class DescriptorParser {
 		}
 	}
 	
-	private Type parseType(boolean acceptVoid) {
+	private DescType parseType(boolean acceptVoid) {
 		String token = nextToken();
 		char firstChar = token.charAt(0);
 		if (firstChar == '[') {
@@ -65,15 +65,15 @@ public class DescriptorParser {
 				dimension++;
 				componentType = nextToken();
 			}
-			return new ArrayType(dimension, createBaseType(componentType));
+			return new ArrayDescType(dimension, createBaseType(componentType));
 		} else if (acceptVoid && firstChar == 'V') {
-			return new VoidType();
+			return new VoidDescType();
 		} else {
 			return createBaseType(token);
 		}
 	}
 	
-	public Type parseField() {
+	public DescType parseField() {
 		return parseType(false);
 	}
 	
@@ -89,7 +89,7 @@ public class DescriptorParser {
 					dimension++;
 					componentType = nextToken();
 				}
-				list.add(new ArrayType(dimension, createBaseType(componentType)));
+				list.add(new ArrayDescType(dimension, createBaseType(componentType)));
 			} else {
 				list.add(createBaseType(token));
 			}
@@ -98,9 +98,9 @@ public class DescriptorParser {
 		returnType = parseType(true);
 	}
 	
-	private Type createBaseType(String type) {
+	private DescType createBaseType(String type) {
 		char first = type.charAt(0);
-		return first == 'L' ? new ObjectType(type.substring(1)) : new PrimitiveType(first);
+		return first == 'L' ? new ObjectDescType(type.substring(1)) : new PrimitiveDescType(first);
 	}
 	
 	private void checkToken(String wanted) {
@@ -110,11 +110,11 @@ public class DescriptorParser {
 		}
 	}
 	
-	public List<Type> getParameters() {
+	public List<DescType> getParameters() {
 		return list;
 	}
 	
-	public Type getReturnType() {
+	public DescType getReturnType() {
 		return returnType;
 	}
 	

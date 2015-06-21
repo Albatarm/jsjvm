@@ -1,8 +1,6 @@
 package com.didactilab.jsjvm.client.classfile.constant;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.reader.Reader;
@@ -10,7 +8,7 @@ import com.didactilab.jsjvm.client.runtime.string.StringHashTable;
 
 public class ConstantPool {
 	
-	private static final Logger LOGGER = Logger.getLogger("ConstantPool");
+	//private static final Logger LOGGER = Logger.getLogger("ConstantPool");
 	
 	private StringHashTable stringTable = new StringHashTable();
 	

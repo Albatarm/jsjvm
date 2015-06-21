@@ -19,6 +19,14 @@
 			<include name="StringCoding.java" />
 			<include name="NullPointerException.java" />
 			<include name="Object.java" />
+			<include name="Objects.java" />
+			<include name="Iterable.java" />
+		</javac>
+		<javac destdir="${build.runtime}" target="1.8" includeJavaRuntime="true" 
+					includeantruntime="false" debug="true">
+			<src path="${runtime.source}/java/util" />
+			<include name="Objects.java" />
+			<include name="StringJoiner.java" />
 		</javac>
 	</target>
 

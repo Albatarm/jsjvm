@@ -21,12 +21,16 @@ import com.didactilab.jsjvm.client.classfile.attribute.LocalVariableTable;
 import com.didactilab.jsjvm.client.classfile.constant.ClassConstant;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.classfile.constant.FieldRefConstant;
+import com.didactilab.jsjvm.client.classfile.constant.InterfaceMethodRefConstant;
 import com.didactilab.jsjvm.client.classfile.constant.MethodHandleConstant;
 import com.didactilab.jsjvm.client.classfile.constant.MethodRefConstant;
 import com.didactilab.jsjvm.client.classfile.constant.MethodTypeConstant;
 import com.didactilab.jsjvm.client.classfile.constant.StringConstant;
+import com.didactilab.jsjvm.client.classfile.descriptor.ArrayDescType;
+import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescriptorParser;
-import com.didactilab.jsjvm.client.classfile.descriptor.Type;
+import com.didactilab.jsjvm.client.classfile.descriptor.ObjectDescType;
+import com.didactilab.jsjvm.client.classfile.descriptor.PrimitiveDescType;
 import com.didactilab.jsjvm.client.debug.SystemPrinter;
 import com.didactilab.jsjvm.client.loader.JRESystemJavaClassLoader;
 import com.didactilab.jsjvm.client.loader.JavaClassLoader;
@@ -36,7 +40,8 @@ public class Flow {
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		JRESystemJavaClassLoader classLoader = new JRESystemJavaClassLoader(new File("build/runtime"));
 		JavaClass javaClass = classLoader.loadClass("java/lang/String");
-		JavaMethod method = javaClass.findMethod("valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
+		JavaMethod method = javaClass.findMethod("join", "(Ljava/lang/CharSequence;Ljava/lang/Iterable;)Ljava/lang/String;");
+		//JavaMethod method = javaClass.findMethod("valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
 		//JavaMethod method = javaClass.findMethod("getBytes", "(Ljava/nio/charset/Charset;)[B");
 		//JavaMethod method = javaClass.findMethod("copyValueOf", "([CII)Ljava/lang/String;");
 		//JavaMethod method = javaClass.findMethod("toCharArray", "()[C");
@@ -92,25 +97,26 @@ public class Flow {
 		}
 	}
 	
-	private FlowVar getLocalSetter(int index, int addr, FlowValue value) {
+	private FlowVar getLocalSetter(int index, int addr, FlowObject value) {
 		if (locals[index] == null) {
-			Type type;
+			DescType type;
 			String name;
 			if (varTable != null) {
-				Variable var = varTable.getVariableAt(addr, index);
+				Variable var = varTable.getVariableAt(addr+1, index);
 				if (var == null) {
 					throw new IllegalStateException("Local " + index + " at " + addr + " not found in var table");
+				} else {
+					DescriptorParser parser = new DescriptorParser(var.descriptor);
+					type = parser.parseField();
+					name = var.name;
 				}
-				DescriptorParser parser = new DescriptorParser(var.descriptor);
-				type = parser.parseField();
-				name = var.name;
 			} else {
 				type = value.getType();
 				name = "local" + index;
 			}
 			FlowLocal local = new FlowLocal(name);
 			locals[index] = local;
-			return new FlowDeclareVar(local, type);
+			return new FlowDeclareVar(local, new FlowType(typeToString(type)));
 		}
 		return locals[index];
 	}
@@ -134,7 +140,7 @@ public class Flow {
 		boolean leave = false;
 		while (!leave) {
 			int op = parser.nextOp();
-			System.out.println("  stack " + reversed(stack));
+			System.out.println("  #stack " + reversed(stack));
 			System.out.println("  read " + OpCodeData.valueOf(op));
 			switch (op) {
 				case OpCode.ALOAD_0:
@@ -154,9 +160,13 @@ public class Flow {
 				case OpCode.ASTORE_2:
 				case OpCode.ASTORE_3:
 					{
-						FlowVar var = getLocalSetter(op - OpCode.ASTORE_0, parser.getLastOpPosition(), null);
-						stack.push(new FlowAssign(var, stack.pop()));
+						FlowObject obj = stack.pop();
+						FlowVar var = getLocalSetter(op - OpCode.ASTORE_0, parser.getLastOpPosition(), obj);
+						stack.push(new FlowAssign(var, obj));
 					}
+					break;
+				case OpCode.ACONST_NULL:
+					stack.push(new FlowNull());
 					break;
 				case OpCode.ICONST_M1:
 				case OpCode.ICONST_0:
@@ -188,6 +198,9 @@ public class Flow {
 						}
 					}
 					break;
+				case OpCode.POP:
+					stack.pop();
+					break;
 				case OpCode.INVOKEVIRTUAL:
 					{
 						JavaMethod anotherMethod = findMethod(parser.nextConstantPoolIndex());
@@ -200,6 +213,18 @@ public class Flow {
 						stack.push(new FlowCall(anotherMethod, instance, list));
 					}
 					break;
+				case OpCode.INVOKEINTERFACE:
+				{
+					JavaMethod anotherMethod = findInterfaceMethod(parser.nextConstantPoolIndex());
+					int numParameter = anotherMethod.getParameters().length;
+					ArrayList<FlowObject> list = new ArrayList<>();
+					for (int i=0; i<numParameter; i++) {
+						list.add(0, stack.pop());
+					}
+					FlowObject instance = stack.pop();
+					stack.push(new FlowCall(anotherMethod, instance, list));
+				}
+				break;
 				case OpCode.INVOKESTATIC:
 					{
 						JavaMethod theMethod = findMethod(parser.nextConstantPoolIndex());
@@ -240,6 +265,9 @@ public class Flow {
 						leave = true;
 					}
 					break;
+				case OpCode.GOTO:
+					parser.setPosition(parser.getLastOpPosition() + parser.nextBranchOffset());
+					break;
 				case OpCode.ARETURN:
 				case OpCode.IRETURN:
 					stack.push(new FlowReturn(stack.pop()));
@@ -276,6 +304,8 @@ public class Flow {
 				case OpCode.DUP:
 					stack.push(stack.peek());
 					break;
+				case OpCode.NOP:
+					break;
 				default:
 					throw new IllegalArgumentException("Not complete " + OpCodeData.valueOf(op));
 			}
@@ -287,148 +317,6 @@ public class Flow {
 	}
 	
 	public void run() throws ClassNotFoundException {
-		/*for (Parameter param : method.getParameters()) {
-			System.out.println(param);
-		}
-		System.out.println("return " + method.getReturnType());
-		
-		FlowBlock methodBlock = new FlowBlock();
-		FlowBlock lastBlock = methodBlock;
-		
-		Deque<BlockPosition> blocks = new LinkedList<BlockPosition>();
-		blocks.push(new BlockPosition(methodBlock, 0));
-		
-		CodeParser parser = new CodeParser(codeAttr.getCode());
-		
-		while (parser.hasMore()) {
-			
-			FlowBlock currentBlock = blocks.peek().block;
-			Deque<FlowObject> stack = currentBlock.stack;
-			if (lastBlock != currentBlock) {
-				parser.setPosition(blocks.peek().addr);
-				lastBlock = currentBlock;
-			}
-			
-			int op = parser.nextOp();
-			switch (op) {
-				case OpCode.ALOAD_0:
-				case OpCode.ALOAD_1:
-				case OpCode.ALOAD_2:
-				case OpCode.ALOAD_3:
-					stack.push(getLocal(op - OpCode.ALOAD_0));
-					break;
-				case OpCode.ILOAD_0:
-				case OpCode.ILOAD_1:
-				case OpCode.ILOAD_2:
-				case OpCode.ILOAD_3:
-					stack.push(getLocal(op - OpCode.ILOAD_0));
-					break;
-				case OpCode.ASTORE_0:
-				case OpCode.ASTORE_1:
-				case OpCode.ASTORE_2:
-				case OpCode.ASTORE_3:
-					{
-						FlowVar var = getLocalSetter(op - OpCode.ASTORE_0, parser.getLastOpPosition(), null);
-						stack.push(new FlowAssign(var, stack.pop()));
-					}
-					break;
-				case OpCode.ICONST_M1:
-				case OpCode.ICONST_0:
-				case OpCode.ICONST_1:
-				case OpCode.ICONST_2:
-				case OpCode.ICONST_3:
-				case OpCode.ICONST_4:
-				case OpCode.ICONST_5:
-					stack.push(new FlowIntConst(op - OpCode.ICONST_M1 - 1));
-					break;
-				case OpCode.INVOKEVIRTUAL:
-					{
-						JavaMethod anotherMethod = findMethod(parser.nextConstantPoolIndex());
-						int numParameter = anotherMethod.getParameters().length;
-						ArrayList<FlowObject> list = new ArrayList<>();
-						for (int i=0; i<numParameter; i++) {
-							list.add(0, stack.pop());
-						}
-						FlowObject instance = stack.pop();
-						stack.push(new FlowCall(anotherMethod, instance, list));
-					}
-					break;
-				case OpCode.INVOKESTATIC:
-					{
-						JavaMethod theMethod = findMethod(parser.nextConstantPoolIndex());
-						int numParameter = theMethod.getParameters().length;
-						ArrayList<FlowObject> list = new ArrayList<>();
-						for (int i=0; i<numParameter; i++) {
-							list.add(0, stack.pop());
-						}
-						stack.push(new FlowCall(theMethod, list));
-					}
-					break;
-				case OpCode.INVOKESPECIAL:
-					{
-						JavaMethod theMethod = findMethod(parser.nextConstantPoolIndex());
-						int numParameter = theMethod.getParameters().length;
-						ArrayList<FlowObject> list = new ArrayList<>();
-						for (int i=0; i<numParameter; i++) {
-							list.add(0, stack.pop());
-						}
-						if (theMethod.isConstructor()) {
-							// pop the instance
-							//stack.pop();
-							FlowNew instance = (FlowNew) stack.pop();
-							instance.setParameters(list);
-						} else {
-							throw new UnsupportedOperationException(theMethod.getName());
-						}
-					}
-					break;
-				case OpCode.IFNONNULL: 
-					{
-						int offset = parser.nextBranchOffset();
-						FlowBlock trueBlock = new FlowBlock();
-						FlowBlock falseBlock = new FlowBlock();
-						stack.push(new FlowIf(new FlowCond(stack.pop(), "!=", new FlowNull()), trueBlock, falseBlock));
-						
-						blocks.push(new BlockPosition(falseBlock, parser.getPosition()));
-						blocks.push(new BlockPosition(trueBlock, parser.getLastOpPosition() + offset));
-					}
-					break;
-				case OpCode.ARETURN:
-				case OpCode.IRETURN:
-					stack.push(new FlowReturn(stack.pop()));
-					blocks.pop();
-					break;
-				case OpCode.RETURN:
-					blocks.pop();
-					break;
-				case OpCode.GETFIELD:
-					{
-						JavaField field = findField(parser.nextConstantPoolIndex());
-						stack.push(new FlowField(stack.pop(), field));
-					}
-					break;
-				case OpCode.NEW:
-					{
-						JavaClass clazz = findClass(parser.nextConstantPoolIndex());
-						stack.push(new FlowNew(clazz));
-					}
-					break;
-				case OpCode.NEWARRAY:
-					{
-						ArrayType atype = parser.nextArrayType();
-						stack.push(new FlowNewArray(atype, stack.pop()));
-					}
-					break;
-				case OpCode.ARRAYLENGTH:
-					stack.push(new FlowArrayLength(stack.pop()));
-					break;
-				case OpCode.DUP:
-					stack.push(stack.peek());
-					break;
-				default:
-					throw new IllegalArgumentException("Not complete " + OpCodeData.valueOf(op));
-			}
-		}*/
 		FlowBlock methodBlock = decompile(0);
 		
 		System.out.println("\nSource ");
@@ -437,6 +325,13 @@ public class Flow {
 	
 	private JavaMethod findMethod(int constantPoolIndex) throws ClassNotFoundException {
 		MethodRefConstant methodRef = constants.get(constantPoolIndex, MethodRefConstant.class);
+		JavaClass jClass = classLoader.loadClass(methodRef.getClassName().getName());
+		return jClass.findMethod(methodRef.getNameAndType().getName(), 
+				methodRef.getNameAndType().getDescriptor());
+	}
+	
+	private JavaMethod findInterfaceMethod(int constantPoolIndex) throws ClassNotFoundException {
+		InterfaceMethodRefConstant methodRef = constants.get(constantPoolIndex, InterfaceMethodRefConstant.class);
 		JavaClass jClass = classLoader.loadClass(methodRef.getClassName().getName());
 		return jClass.findMethod(methodRef.getNameAndType().getName(), 
 				methodRef.getNameAndType().getDescriptor());
@@ -457,6 +352,35 @@ public class Flow {
 		ArrayList<T> l = new ArrayList<>(c);
 		Collections.reverse(l);
 		return l;
+	}
+	
+	private String typeToString(DescType type) throws ClassNotFoundException {
+		if (type instanceof PrimitiveDescType) {
+			switch (((PrimitiveDescType) type).type) {
+			case 'B': return "byte";
+			case 'C': return "char";
+			case 'D': return "double";
+			case 'F': return "float";
+			case 'I': return "int";
+			case 'J': return "long";
+			case 'S': return "short";
+			case 'Z': return "boolean";
+				default:
+					throw new IllegalArgumentException();
+			}
+		} else if (type instanceof ObjectDescType) {
+			JavaClass clazz = classLoader.loadClass(((ObjectDescType) type).name);
+			return clazz.getJavaName();
+		} else if (type instanceof ArrayDescType) {
+			ArrayDescType atype = (ArrayDescType) type;
+			String dimStr = "";
+			for (int i=0; i<atype.dimension; i++) {
+				dimStr += "[]";
+			}
+			return typeToString(atype.type) + dimStr;
+		} else {
+			throw new IllegalArgumentException();
+		}
 	}
 	
 }
