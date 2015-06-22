@@ -18,6 +18,11 @@ public enum PrimitiveType implements Type {
 		this.name = name;
 	}
 	
+	@Override
+	public String getJavaName() {
+		return name;
+	}
+	
 	public static PrimitiveType valueOf(char sign) {
 		for (PrimitiveType p : values()) {
 			if (p.sign == sign) {

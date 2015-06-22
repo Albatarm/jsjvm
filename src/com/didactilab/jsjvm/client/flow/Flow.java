@@ -29,8 +29,12 @@ import com.didactilab.jsjvm.client.classfile.constant.MethodHandleConstant;
 import com.didactilab.jsjvm.client.classfile.constant.MethodRefConstant;
 import com.didactilab.jsjvm.client.classfile.constant.MethodTypeConstant;
 import com.didactilab.jsjvm.client.classfile.constant.StringConstant;
+import com.didactilab.jsjvm.client.classfile.descriptor.ArrayDescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescriptorParser;
+import com.didactilab.jsjvm.client.classfile.descriptor.ObjectDescType;
+import com.didactilab.jsjvm.client.classfile.descriptor.PrimitiveDescType;
+import com.didactilab.jsjvm.client.classfile.descriptor.VoidDescType;
 import com.didactilab.jsjvm.client.debug.SystemPrinter;
 import com.didactilab.jsjvm.client.loader.JRESystemJavaClassLoader;
 import com.didactilab.jsjvm.client.loader.JavaClassLoader;
@@ -99,7 +103,7 @@ public class Flow {
 	
 	private FlowVar getLocalSetter(int index, int addr, FlowObject value) {
 		if (locals[index] == null) {
-			DescType type;
+			Type type;
 			String name;
 			if (varTable != null) {
 				Variable var = varTable.getVariableAt(addr+1, index);
@@ -107,16 +111,16 @@ public class Flow {
 					throw new IllegalStateException("Local " + index + " at " + addr + " not found in var table");
 				} else {
 					DescriptorParser parser = new DescriptorParser(var.descriptor);
-					type = parser.parseField();
+					type = toType(parser.parseField());
 					name = var.name;
 				}
 			} else {
-				type = value instanceof FlowValue ? value.getType() : null;
+				type = value instanceof FlowValue ? ((FlowValue) value).getType() : getObjectType();
 				name = "local" + index;
 			}
 			FlowLocal local = new FlowLocal(name);
 			locals[index] = local;
-			return new FlowDeclareVar(local, new FlowType(typeToString(type)));
+			return new FlowDeclareVar(local, new FlowType(type.getJavaName()));
 		}
 		return locals[index];
 	}
@@ -186,7 +190,7 @@ public class Flow {
 						} else if (constObj instanceof Float) {
 							stack.push(new FlowFloatConst((Float) constObj));
 						} else if (constObj instanceof StringConstant) {
-							stack.push(new FlowStringConst(((StringConstant) constObj).value()), getStringType());
+							stack.push(new FlowStringConst(((StringConstant) constObj).value(), getStringType()));
 						} else if (constObj instanceof ClassConstant) {
 							throw new UnsupportedOperationException();
 						} else if (constObj instanceof MethodTypeConstant) {
@@ -354,18 +358,40 @@ public class Flow {
 		return l;
 	}
 	
-	private String typeToString(Type type) throws ClassNotFoundException {
-		if (type instanceof PrimitiveType) {
-			return ((PrimitiveType) type).name;
-		} else if (type instanceof JavaClass) {
-			return ((JavaClass) type).getJavaName();
-		} else if (type instanceof ArrayType) {
-			
-		}
+	private Type getStringType() {
+		return classLoader.findLoadedClass("java/lang/String");
 	}
 	
-	private Type getStringType() {
-		
+	private Type getObjectType() {
+		return classLoader.findLoadedClass("java/lang/Object");
+	}
+	
+	private Type toType(DescType descType) {
+		try {
+			if (descType instanceof PrimitiveDescType) {
+				return ((PrimitiveDescType) descType).getPrimitive();
+			} else if (descType instanceof ArrayDescType) {
+				ArrayDescType adt = (ArrayDescType) descType;
+				DescType dtype = adt.type;
+				Type componentType;
+				if (dtype instanceof PrimitiveDescType) {
+					componentType = ((PrimitiveDescType) dtype).getPrimitive();
+				} else if (dtype instanceof ObjectDescType) {
+					componentType = classLoader.loadClass(((ObjectDescType) dtype).name);
+				} else {
+					throw new IllegalStateException("descriptor parser fails with component type : " + dtype);
+				}
+				return new ArrayType(adt.dimension, componentType, adt.getDescriptor());
+			} else if (descType instanceof ObjectDescType) {
+				return classLoader.loadClass(((ObjectDescType) descType).name);
+			} else if (descType instanceof VoidDescType) {
+				return null;
+			} else {
+				throw new IllegalStateException("descriptor parser fails : " + descType);
+			}
+		} catch (ClassNotFoundException e) {
+			throw new IllegalArgumentException("Cannot be possible");
+		}
 	}
 	
 }

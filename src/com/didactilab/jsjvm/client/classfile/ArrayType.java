@@ -6,6 +6,9 @@ public class ArrayType implements Type {
 	private final Type componentType;
 	private final String descriptor;
 	
+	@Deprecated
+	private String javaName;
+	
 	public ArrayType(int dimension, Type componentType, String descriptor) {
 		this.dimension = dimension;
 		this.componentType = componentType;
@@ -26,7 +29,14 @@ public class ArrayType implements Type {
 	
 	@Deprecated
 	public String getJavaName() {
-		//String name = componentType instanceof PrimitiveType ? ((PrimitiveType) componentType).name : ()
+		if (javaName == null) {
+			String name = componentType.getJavaName();
+			for (int i=0; i<dimension; i++) {
+				name += "[]";
+			}
+			javaName = name;
+		} 
+		return javaName;
 	}
 	
 }
