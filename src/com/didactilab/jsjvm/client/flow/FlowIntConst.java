@@ -1,7 +1,7 @@
 package com.didactilab.jsjvm.client.flow;
 
-import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
-import com.didactilab.jsjvm.client.classfile.descriptor.PrimitiveDescType;
+import com.didactilab.jsjvm.client.classfile.PrimitiveType;
+import com.didactilab.jsjvm.client.classfile.Type;
 
 public class FlowIntConst extends AbstractFlowObject implements FlowValue {
 
@@ -17,8 +17,8 @@ public class FlowIntConst extends AbstractFlowObject implements FlowValue {
 	}
 	
 	@Override
-	public DescType getType() {
-		return new PrimitiveDescType('I');
+	public Type getType() {
+		return PrimitiveType.INT;
 	}
 	
 }

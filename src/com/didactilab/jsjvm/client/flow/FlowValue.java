@@ -1,7 +1,7 @@
 package com.didactilab.jsjvm.client.flow;
 
-import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
+import com.didactilab.jsjvm.client.classfile.Type;
 
 public interface FlowValue extends FlowObject {
-	DescType getType();
+	Type getType();
 }

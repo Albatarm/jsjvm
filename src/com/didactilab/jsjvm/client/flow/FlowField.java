@@ -1,8 +1,7 @@
 package com.didactilab.jsjvm.client.flow;
 
 import com.didactilab.jsjvm.client.classfile.JavaField;
-import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
-import com.didactilab.jsjvm.client.classfile.descriptor.DescriptorParser;
+import com.didactilab.jsjvm.client.classfile.Type;
 
 public class FlowField extends AbstractFlowObject implements FlowValue {
 
@@ -20,9 +19,8 @@ public class FlowField extends AbstractFlowObject implements FlowValue {
 	}
 	
 	@Override
-	public DescType getType() {
-		DescriptorParser parser = new DescriptorParser(field.getDescriptor());
-		return parser.parseField();
+	public Type getType() {
+		return field.getType();
 	}
 
 }

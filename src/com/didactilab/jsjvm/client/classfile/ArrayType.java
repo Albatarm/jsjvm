@@ -24,4 +24,9 @@ public class ArrayType implements Type {
 		return descriptor;
 	}
 	
+	@Deprecated
+	public String getJavaName() {
+		//String name = componentType instanceof PrimitiveType ? ((PrimitiveType) componentType).name : ()
+	}
+	
 }

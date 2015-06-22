@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 
+import com.didactilab.jsjvm.client.classfile.ArrayType;
 import com.didactilab.jsjvm.client.classfile.ClassNotFoundException;
 import com.didactilab.jsjvm.client.classfile.JavaClass;
 import com.didactilab.jsjvm.client.classfile.JavaField;
@@ -14,9 +15,11 @@ import com.didactilab.jsjvm.client.classfile.JavaMethod;
 import com.didactilab.jsjvm.client.classfile.JavaMethod.Parameter;
 import com.didactilab.jsjvm.client.classfile.OpCode;
 import com.didactilab.jsjvm.client.classfile.OpCodeData;
+import com.didactilab.jsjvm.client.classfile.PrimitiveType;
+import com.didactilab.jsjvm.client.classfile.Type;
 import com.didactilab.jsjvm.client.classfile.attribute.AbstractLocalVariableTable.Variable;
-import com.didactilab.jsjvm.client.classfile.attribute.CodeArrayType;
 import com.didactilab.jsjvm.client.classfile.attribute.Code;
+import com.didactilab.jsjvm.client.classfile.attribute.CodeArrayType;
 import com.didactilab.jsjvm.client.classfile.attribute.LocalVariableTable;
 import com.didactilab.jsjvm.client.classfile.constant.ClassConstant;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
@@ -26,11 +29,8 @@ import com.didactilab.jsjvm.client.classfile.constant.MethodHandleConstant;
 import com.didactilab.jsjvm.client.classfile.constant.MethodRefConstant;
 import com.didactilab.jsjvm.client.classfile.constant.MethodTypeConstant;
 import com.didactilab.jsjvm.client.classfile.constant.StringConstant;
-import com.didactilab.jsjvm.client.classfile.descriptor.ArrayDescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescriptorParser;
-import com.didactilab.jsjvm.client.classfile.descriptor.ObjectDescType;
-import com.didactilab.jsjvm.client.classfile.descriptor.PrimitiveDescType;
 import com.didactilab.jsjvm.client.debug.SystemPrinter;
 import com.didactilab.jsjvm.client.loader.JRESystemJavaClassLoader;
 import com.didactilab.jsjvm.client.loader.JavaClassLoader;
@@ -39,8 +39,8 @@ public class Flow {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		JRESystemJavaClassLoader classLoader = new JRESystemJavaClassLoader(new File("build/runtime"));
-		JavaClass javaClass = classLoader.loadClass("java/lang/String");
-		JavaMethod method = javaClass.findMethod("join", "(Ljava/lang/CharSequence;Ljava/lang/Iterable;)Ljava/lang/String;");
+		JavaClass javaClass = classLoader.loadClass("java/lang/Object", true);
+		JavaMethod method = javaClass.findMethod("toString", "()Ljava/lang/String;");
 		//JavaMethod method = javaClass.findMethod("valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
 		//JavaMethod method = javaClass.findMethod("getBytes", "(Ljava/nio/charset/Charset;)[B");
 		//JavaMethod method = javaClass.findMethod("copyValueOf", "([CII)Ljava/lang/String;");
@@ -111,7 +111,7 @@ public class Flow {
 					name = var.name;
 				}
 			} else {
-				type = value.getType();
+				type = value instanceof FlowValue ? value.getType() : null;
 				name = "local" + index;
 			}
 			FlowLocal local = new FlowLocal(name);
@@ -186,7 +186,7 @@ public class Flow {
 						} else if (constObj instanceof Float) {
 							stack.push(new FlowFloatConst((Float) constObj));
 						} else if (constObj instanceof StringConstant) {
-							stack.push(new FlowStringConst(((StringConstant) constObj).value()));
+							stack.push(new FlowStringConst(((StringConstant) constObj).value()), getStringType());
 						} else if (constObj instanceof ClassConstant) {
 							throw new UnsupportedOperationException();
 						} else if (constObj instanceof MethodTypeConstant) {
@@ -354,33 +354,18 @@ public class Flow {
 		return l;
 	}
 	
-	private String typeToString(DescType type) throws ClassNotFoundException {
-		if (type instanceof PrimitiveDescType) {
-			switch (((PrimitiveDescType) type).type) {
-			case 'B': return "byte";
-			case 'C': return "char";
-			case 'D': return "double";
-			case 'F': return "float";
-			case 'I': return "int";
-			case 'J': return "long";
-			case 'S': return "short";
-			case 'Z': return "boolean";
-				default:
-					throw new IllegalArgumentException();
-			}
-		} else if (type instanceof ObjectDescType) {
-			JavaClass clazz = classLoader.loadClass(((ObjectDescType) type).name);
-			return clazz.getJavaName();
-		} else if (type instanceof ArrayDescType) {
-			ArrayDescType atype = (ArrayDescType) type;
-			String dimStr = "";
-			for (int i=0; i<atype.dimension; i++) {
-				dimStr += "[]";
-			}
-			return typeToString(atype.type) + dimStr;
-		} else {
-			throw new IllegalArgumentException();
+	private String typeToString(Type type) throws ClassNotFoundException {
+		if (type instanceof PrimitiveType) {
+			return ((PrimitiveType) type).name;
+		} else if (type instanceof JavaClass) {
+			return ((JavaClass) type).getJavaName();
+		} else if (type instanceof ArrayType) {
+			
 		}
+	}
+	
+	private Type getStringType() {
+		
 	}
 	
 }
