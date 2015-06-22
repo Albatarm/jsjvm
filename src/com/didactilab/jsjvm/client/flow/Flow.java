@@ -15,7 +15,7 @@ import com.didactilab.jsjvm.client.classfile.JavaMethod.Parameter;
 import com.didactilab.jsjvm.client.classfile.OpCode;
 import com.didactilab.jsjvm.client.classfile.OpCodeData;
 import com.didactilab.jsjvm.client.classfile.attribute.AbstractLocalVariableTable.Variable;
-import com.didactilab.jsjvm.client.classfile.attribute.ArrayType;
+import com.didactilab.jsjvm.client.classfile.attribute.CodeArrayType;
 import com.didactilab.jsjvm.client.classfile.attribute.Code;
 import com.didactilab.jsjvm.client.classfile.attribute.LocalVariableTable;
 import com.didactilab.jsjvm.client.classfile.constant.ClassConstant;
@@ -294,7 +294,7 @@ public class Flow {
 					break;
 				case OpCode.NEWARRAY:
 					{
-						ArrayType atype = parser.nextArrayType();
+						CodeArrayType atype = parser.nextArrayType();
 						stack.push(new FlowNewArray(atype, stack.pop()));
 					}
 					break;

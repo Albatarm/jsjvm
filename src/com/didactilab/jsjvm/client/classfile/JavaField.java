@@ -1,7 +1,12 @@
 package com.didactilab.jsjvm.client.classfile;
 
+import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
+import com.didactilab.jsjvm.client.classfile.descriptor.DescriptorParser;
+
 
 public class JavaField extends JavaMember {
+	
+	private Type type;
 
 	public JavaField(JavaClass javaClass) {
 		super(javaClass);
@@ -22,4 +27,14 @@ public class JavaField extends JavaMember {
 		return getDescriptor() + " " + getName();
 	}
 
+	public void resolve() throws ClassNotFoundException {
+		DescriptorParser parser = new DescriptorParser(getDescriptor());
+		DescType t = parser.parseField();
+		type = toType(t);
+	}
+	
+	public Type getType() {
+		return type;
+	}
+	
 }

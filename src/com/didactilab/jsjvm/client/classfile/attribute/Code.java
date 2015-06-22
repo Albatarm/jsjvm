@@ -149,7 +149,7 @@ public class Code extends Attribute {
 					case ATYPE:
 						{
 							int type = code[pos++] & 0xFF;
-							ArrayType arrayType = ArrayType.valueOfCode(type);
+							CodeArrayType arrayType = CodeArrayType.valueOfCode(type);
 							text += " " + arrayType.name;
 						}
 						break;

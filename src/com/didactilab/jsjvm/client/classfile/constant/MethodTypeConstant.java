@@ -6,12 +6,19 @@ import com.didactilab.jsjvm.client.reader.Reader;
 
 public class MethodTypeConstant extends AbstractConstant {
 	
-	public final String type;
+	private int typeIndex;
+	private String type;
 	
 	public MethodTypeConstant(ConstantPool owner, Reader reader) throws IOException {
 		super(owner);
-		int index = reader.readUInt16();
-		type = getString(index);
+		typeIndex = reader.readUInt16();
 	}
 
+	public String getType() {
+		if (type == null) {
+			type = getString(typeIndex);
+		}
+		return type;
+	}
+	
 }

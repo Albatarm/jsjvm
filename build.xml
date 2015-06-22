@@ -9,24 +9,19 @@
 		<delete dir="${build}" />
 	</target>
 	
-	<target name="build-rt" description="Build runtime">
+	<target name="download-runtime" description="download runtime openjdk 8">
+		<mkdir dir="build/runtime-src" />
+		<get src="http://hg.openjdk.java.net/jdk8/jdk8/jdk/archive/687fd7c7986d.zip/src/share/classes/" dest="build/runtime-src/classes.zip" verbose="true"/>
+		<unzip src="build/runtime-src/classes.zip" dest="build/runtime-src">
+			<cutdirsmapper dirs="4" /> 
+		</unzip>
+	</target>
+	
+	<target name="build-runtime" depends="download-runtime" description="Build runtime">
 		<mkdir dir="${build.runtime}" />
-		<javac destdir="${build.runtime}" target="1.8" includeJavaRuntime="true" 
-			includeantruntime="false" debug="true">
-			<src path="${runtime.source}/java/lang" />
-			<include name="String.java" />
-			<include name="System.java" />
-			<include name="StringCoding.java" />
-			<include name="NullPointerException.java" />
-			<include name="Object.java" />
-			<include name="Objects.java" />
-			<include name="Iterable.java" />
-		</javac>
-		<javac destdir="${build.runtime}" target="1.8" includeJavaRuntime="true" 
-					includeantruntime="false" debug="true">
-			<src path="${runtime.source}/java/util" />
-			<include name="Objects.java" />
-			<include name="StringJoiner.java" />
+		<javac destdir="${build.runtime}" target="1.8" includeJavaRuntime="true" includeantruntime="false" debug="true">
+			<src path="build/runtime-src" />
+			<include name="java/lang/*.java" />
 		</javac>
 	</target>
 

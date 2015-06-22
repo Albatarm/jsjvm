@@ -1,6 +1,6 @@
 package com.didactilab.jsjvm.client.flow;
 
-import com.didactilab.jsjvm.client.classfile.attribute.ArrayType;
+import com.didactilab.jsjvm.client.classfile.attribute.CodeArrayType;
 
 public class CodeParser {
 
@@ -29,8 +29,8 @@ public class CodeParser {
 		return nextUnsignedByte();
 	}
 	
-	public ArrayType nextArrayType() {
-		return ArrayType.valueOfCode(nextUnsignedByte());
+	public CodeArrayType nextArrayType() {
+		return CodeArrayType.valueOfCode(nextUnsignedByte());
 	}
 	
 	public int nextBranchOffset() {

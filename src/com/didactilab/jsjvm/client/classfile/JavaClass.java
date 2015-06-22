@@ -13,7 +13,7 @@ import com.didactilab.jsjvm.client.loader.JRESystemJavaClassLoader;
 import com.didactilab.jsjvm.client.loader.JavaClassLoader;
 import com.didactilab.jsjvm.client.reader.Reader;
 
-public class JavaClass {
+public class JavaClass implements Type {
 
 	private static final int MAGIC = 0xCAFEBABE;
 	
@@ -33,6 +33,10 @@ public class JavaClass {
 	private JavaMethod[] methods;
 	
 	private final Attributes attributes;
+	
+	// resolved
+	private JavaClass resolvedSuperClass;
+	private JavaClass[] resolvedInterfaces;
 	
 	public JavaClass(JavaClassLoader classLoader) {
 		this.classLoader = classLoader;
@@ -93,7 +97,7 @@ public class JavaClass {
 	
 	public void print(Printer printer) {
 		printer.println("version ", JavaVersion.valueOf(majorVersion), " minor ", minorVersion);
-		printer.print("class ", thisClass.getName(), " extends ", superClass.getName());
+		printer.print("class ", thisClass.getName(), (superClass != null ? " extends " + superClass.getName() : ""));
 		if (interfaces.length != 0) {
 			printer.print(" implements");
 			for (ClassConstant inf : interfaces) {
@@ -146,10 +150,33 @@ public class JavaClass {
 		return thisClass.getName().replace('/', '.');
 	}
 	
+	public JavaClass[] getInterfaces() {
+		return resolvedInterfaces;
+	}
+	
+	public JavaClass getSuperClass() {
+		return resolvedSuperClass;
+	}
+	
+	public void resolve() throws ClassNotFoundException {
+		resolvedSuperClass = superClass != null ? classLoader.loadClass(superClass.getName()) : null;
+		resolvedInterfaces = new JavaClass[interfaces.length];
+		for (int i = 0, c = interfaces.length; i < c; i++) {
+			resolvedInterfaces[i] = classLoader.loadClass(interfaces[i].getName());
+		}
+		for (JavaField field : fields) {
+			field.resolve();
+		}
+		for (JavaMethod method : methods) {
+			method.resolve();
+		}
+	}
+	
 	public static void main(String[] args) throws IOException {
 		JRESystemJavaClassLoader classLoader = new JRESystemJavaClassLoader(new File("build/runtime"));
 		try {
-			JavaClass clazz = classLoader.loadClass("java/lang/String");
+			JavaClass clazz = classLoader.loadClass("java/lang/Object");
+			classLoader.resolveClass(clazz);
 			clazz.print(new SystemPrinter());
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -157,6 +184,10 @@ public class JavaClass {
 		}
 		
 		System.out.println("\nUnknown attributes : " + UnknownAttribute.UNKNOWN_ATTRIBUTES);
+		System.out.println("\nclass loader classes : ");
+		for (JavaClass cls : classLoader.getClasses()) {
+			System.out.println("  - " + cls.getName());
+		}
 		
 	}
 	

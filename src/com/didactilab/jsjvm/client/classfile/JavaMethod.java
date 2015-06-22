@@ -11,39 +11,46 @@ import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
 
 public class JavaMethod extends JavaMember {
 	
-	public static class Parameter {
+	public class Parameter {
 		public final int index;
 		public final String name;
-		public final DescType type;
+		public final DescType descriptorType;
+		private Type resolvedType;
 		
-		public Parameter(int index, String name, DescType type) {
+		public Parameter(int index, String name, DescType descriptorType) {
 			this.index = index;
 			this.name = name;
-			this.type = type;
+			this.descriptorType = descriptorType;
 		}
 		
 		public String getDescriptor() {
-			return type.getDescriptor();
+			return descriptorType.getDescriptor();
 		}
 		
 		public int getIndex() {
 			return index;
 		}
 		
-		public DescType getType() {
-			return type;
-		}
-		
 		@Override
 		public String toString() {
-			return type.getDescriptor() + " " + name; 
+			return descriptorType.getDescriptor() + " " + name; 
+		}
+		
+		public Type getType() {
+			return resolvedType;
+		}
+		
+		private void resolve() throws ClassNotFoundException {
+			resolvedType = toType(descriptorType);
 		}
 	}
 	
 	private Parameter[] parameters;
-	private DescType returnType;
+	private DescType returnDescType;
 	
 	private Code code;
+	
+	private Type resolvedReturnType;
 
 	public JavaMethod(JavaClass javaClass) {
 		super(javaClass);
@@ -52,6 +59,7 @@ public class JavaMethod extends JavaMember {
 	@Override
 	protected void afterRead() {
 		code = getAttributes().get(Code.NAME, Code.class);
+		initParameters();
 	}
 
 	@Override
@@ -70,9 +78,6 @@ public class JavaMethod extends JavaMember {
 	}
 	
 	public Parameter[] getParameters() {
-		if (parameters == null) {
-			initParameters();
-		}
 		return parameters;
 	}
 	
@@ -84,15 +89,23 @@ public class JavaMethod extends JavaMember {
 		return "<init>".equals(getName());
 	}
 	
-	public DescType getReturnType() {
-		if (parameters == null) {
-			initParameters();
-		}
-		return returnType;
+	public DescType getReturnDescType() {
+		return returnDescType;
+	}
+	
+	public Type getReturnType() {
+		return resolvedReturnType;
 	}
 	
 	public Code getCodeAttribute() {
 		return code;
+	}
+	
+	public void resolve() throws ClassNotFoundException {
+		for (Parameter parameter : parameters) {
+			parameter.resolve();
+		}
+		resolvedReturnType = toType(returnDescType);
 	}
 	
 	private LocalVariableTable getCodeLocalVariableTable() {
@@ -119,7 +132,7 @@ public class JavaMethod extends JavaMember {
 		}
 		parameters = ps.toArray(new Parameter[ps.size()]);
 		//
-		returnType = parser.getReturnType();
+		returnDescType = parser.getReturnType();
 	}
 	
 }
