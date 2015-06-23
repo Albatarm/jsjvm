@@ -3,6 +3,8 @@ package com.didactilab.jsjvm.client.classfile.descriptor;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.didactilab.jsjvm.client.classfile.PrimitiveType;
+
 public class DescriptorParser {
 	
 	private final ArrayList<DescType> list = new ArrayList<>();
@@ -100,7 +102,7 @@ public class DescriptorParser {
 	
 	private DescType createBaseType(String type) {
 		char first = type.charAt(0);
-		return first == 'L' ? new ObjectDescType(type.substring(1)) : new PrimitiveDescType(first);
+		return first == 'L' ? new ObjectDescType(type.substring(1)) : PrimitiveType.valueOf(first);
 	}
 	
 	private void checkToken(String wanted) {

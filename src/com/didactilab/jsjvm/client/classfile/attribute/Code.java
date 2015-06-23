@@ -131,7 +131,7 @@ public class Code extends Attribute {
 	public void print(Printer printer) {
 		printer.println("max stack : ", maxStack);
 		printer.println("max locals : ", maxLocals);
-		printer.println("code :");
+		printer.println("code [0..", code.length - 1, "] :");
 		
 		ArrayList<Instruction> instructions = new ArrayList<>();
 		Labels labels = new Labels();

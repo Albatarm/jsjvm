@@ -24,11 +24,14 @@ public class FlowBlock implements FlowObject {
 	@Override
 	public String toSource() {
 		SourceBuilder sb = new SourceBuilder();
-		sb.append("{\n");
+		sb.append("{");
 		for (FlowObject obj : stack) {
-			sb.append(obj).append(";\n");
+			sb.append(obj);
+			if (!(obj instanceof FlowBlock || obj instanceof FlowIf)) {
+				sb.append(";");
+			}
 		}
-		sb.append("}\n");
+		sb.append("}");
 		return sb.toSource();
 	}
 

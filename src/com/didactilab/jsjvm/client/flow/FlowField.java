@@ -3,12 +3,13 @@ package com.didactilab.jsjvm.client.flow;
 import com.didactilab.jsjvm.client.classfile.JavaField;
 import com.didactilab.jsjvm.client.classfile.Type;
 
-public class FlowField extends AbstractFlowObject implements FlowValue {
+public class FlowField extends AbstractMemberFlowObject implements FlowValue {
 
 	private final FlowObject instance;
 	private final JavaField field;
 
 	public FlowField(FlowObject instance, JavaField field) {
+		super(null);
 		this.instance = instance;
 		this.field = field;
 	}

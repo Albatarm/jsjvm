@@ -12,23 +12,19 @@ import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
 public class JavaMethod extends JavaMember {
 	
 	public class Parameter {
-		public final int index;
+		public final int localIndex;
 		public final String name;
 		public final DescType descriptorType;
 		private Type resolvedType;
 		
 		public Parameter(int index, String name, DescType descriptorType) {
-			this.index = index;
+			this.localIndex = index;
 			this.name = name;
 			this.descriptorType = descriptorType;
 		}
 		
 		public String getDescriptor() {
 			return descriptorType.getDescriptor();
-		}
-		
-		public int getIndex() {
-			return index;
 		}
 		
 		@Override
@@ -119,16 +115,20 @@ public class JavaMethod extends JavaMember {
 		parser.parseMethod();
 		ArrayList<Parameter> ps = new ArrayList<>();
 		final List<DescType> params = parser.getParameters();
+		int index = isStatic() ? 0 : 1;
 		for (int i=0, c=params.size(); i<c; i++) {
 			DescType type = params.get(i);
 			String name;
 			if (varTable != null) {
-				Variable var = varTable.getOnlyVariableAt(isStatic() ? i : i+1);
+				Variable var = varTable.getOnlyVariableAt(index);
 				name = var != null ? var.name : "param" + i;
 			} else {
 				name = "param" + i;
 			}
-			ps.add(new Parameter(i, name, type));
+			ps.add(new Parameter(index++, name, type));
+			if (type == PrimitiveType.DOUBLE || type == PrimitiveType.LONG) {
+				index++;
+			}
 		}
 		parameters = ps.toArray(new Parameter[ps.size()]);
 		//

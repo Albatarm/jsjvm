@@ -1,6 +1,8 @@
 package com.didactilab.jsjvm.client.classfile;
 
-public enum PrimitiveType implements Type {
+import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
+
+public enum PrimitiveType implements Type, DescType {
 	BYTE		('B', "byte"),
 	SHORT		('S', "short"),
 	INT			('I', "int"),
@@ -23,6 +25,11 @@ public enum PrimitiveType implements Type {
 		return name;
 	}
 	
+	@Override
+	public String getDescriptor() {
+		return String.valueOf(sign);
+	}
+	
 	public static PrimitiveType valueOf(char sign) {
 		for (PrimitiveType p : values()) {
 			if (p.sign == sign) {
@@ -31,4 +38,5 @@ public enum PrimitiveType implements Type {
 		}
 		return null;
 	}
+
 }

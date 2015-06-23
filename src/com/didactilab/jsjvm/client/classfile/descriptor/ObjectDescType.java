@@ -1,6 +1,6 @@
 package com.didactilab.jsjvm.client.classfile.descriptor;
 
-public class ObjectDescType extends DescType {
+public class ObjectDescType extends AbstractDescType {
 	public final String name;
 	
 	public ObjectDescType(String name) {

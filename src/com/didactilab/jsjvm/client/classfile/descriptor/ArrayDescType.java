@@ -1,6 +1,6 @@
 package com.didactilab.jsjvm.client.classfile.descriptor;
 
-public class ArrayDescType extends DescType {
+public class ArrayDescType extends AbstractDescType {
 	public final int dimension;
 	public final DescType type;
 	

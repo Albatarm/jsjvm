@@ -6,7 +6,6 @@ import com.didactilab.jsjvm.client.classfile.attribute.Attributes;
 import com.didactilab.jsjvm.client.classfile.descriptor.ArrayDescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.ObjectDescType;
-import com.didactilab.jsjvm.client.classfile.descriptor.PrimitiveDescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.VoidDescType;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;
 import com.didactilab.jsjvm.client.debug.Printer;
@@ -75,14 +74,14 @@ public abstract class JavaMember {
 	}
 	
 	protected Type toType(DescType descType) throws ClassNotFoundException {
-		if (descType instanceof PrimitiveDescType) {
-			return ((PrimitiveDescType) descType).getPrimitive();
+		if (descType instanceof PrimitiveType) {
+			return (PrimitiveType) descType;
 		} else if (descType instanceof ArrayDescType) {
 			ArrayDescType adt = (ArrayDescType) descType;
 			DescType dtype = adt.type;
 			Type componentType;
-			if (dtype instanceof PrimitiveDescType) {
-				componentType = ((PrimitiveDescType) dtype).getPrimitive();
+			if (dtype instanceof PrimitiveType) {
+				componentType = (PrimitiveType) dtype;
 			} else if (dtype instanceof ObjectDescType) {
 				componentType = getJavaClass().getClassLoader().loadClass(((ObjectDescType) dtype).name);
 			} else {

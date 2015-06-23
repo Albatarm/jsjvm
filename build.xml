@@ -11,7 +11,7 @@
 	
 	<target name="download-runtime" description="download runtime openjdk 8">
 		<mkdir dir="build/runtime-src" />
-		<get src="http://hg.openjdk.java.net/jdk8/jdk8/jdk/archive/687fd7c7986d.zip/src/share/classes/" dest="build/runtime-src/classes.zip" verbose="true"/>
+		<get src="http://hg.openjdk.java.net/jdk8/jdk8/jdk/archive/687fd7c7986d.zip/src/share/classes/" dest="build/runtime-src/classes.zip" verbose="true" usetimestamp="true"/>
 		<unzip src="build/runtime-src/classes.zip" dest="build/runtime-src">
 			<cutdirsmapper dirs="4" /> 
 		</unzip>

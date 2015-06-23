@@ -33,18 +33,18 @@ import com.didactilab.jsjvm.client.classfile.descriptor.ArrayDescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescriptorParser;
 import com.didactilab.jsjvm.client.classfile.descriptor.ObjectDescType;
-import com.didactilab.jsjvm.client.classfile.descriptor.PrimitiveDescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.VoidDescType;
 import com.didactilab.jsjvm.client.debug.SystemPrinter;
 import com.didactilab.jsjvm.client.loader.JRESystemJavaClassLoader;
 import com.didactilab.jsjvm.client.loader.JavaClassLoader;
+import com.didactilab.jsjvm.client.util.Indentation;
 
 public class Flow {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		JRESystemJavaClassLoader classLoader = new JRESystemJavaClassLoader(new File("build/runtime"));
 		JavaClass javaClass = classLoader.loadClass("java/lang/Object", true);
-		JavaMethod method = javaClass.findMethod("toString", "()Ljava/lang/String;");
+		JavaMethod method = javaClass.findMethod("wait", "(JI)V");
 		//JavaMethod method = javaClass.findMethod("valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
 		//JavaMethod method = javaClass.findMethod("getBytes", "(Ljava/nio/charset/Charset;)[B");
 		//JavaMethod method = javaClass.findMethod("copyValueOf", "([CII)Ljava/lang/String;");
@@ -89,12 +89,11 @@ public class Flow {
 	}
 	
 	private void initLocals() {
-		int paramCount = method.getParameters().length;
 		locals = new FlowVar[codeAttr.getMaxLocals()];
-		int startParameterIndex = method.isStatic() ? 0 : 1;
-		for (int i=0; i<paramCount; i++) {
-			Parameter param = method.getParameters()[i];
-			locals[startParameterIndex + i] = new FlowParameter(param);
+		System.out.println("init vars :");
+		for (Parameter param : method.getParameters()) {
+			locals[param.localIndex] = new FlowParameter(param);
+			System.out.println("  var " + param.localIndex + " => " + locals[param.localIndex] + " from " + param);
 		}
 		if (!method.isStatic()) {
 			locals[0] = new FlowThis();
@@ -142,7 +141,7 @@ public class Flow {
 		Deque<FlowObject> stack = current.stack;
 		
 		boolean leave = false;
-		while (!leave) {
+		while (!leave && parser.hasMore()) {
 			int op = parser.nextOp();
 			System.out.println("  #stack " + reversed(stack));
 			System.out.println("  read " + OpCodeData.valueOf(op));
@@ -159,6 +158,12 @@ public class Flow {
 				case OpCode.ILOAD_3:
 					stack.push(getLocal(op - OpCode.ILOAD_0));
 					break;
+				case OpCode.LLOAD_0:
+				case OpCode.LLOAD_1:
+				case OpCode.LLOAD_2:
+				case OpCode.LLOAD_3:
+					stack.push(getLocal(op - OpCode.LLOAD_0));
+					break;
 				case OpCode.ASTORE_0:
 				case OpCode.ASTORE_1:
 				case OpCode.ASTORE_2:
@@ -166,6 +171,16 @@ public class Flow {
 					{
 						FlowObject obj = stack.pop();
 						FlowVar var = getLocalSetter(op - OpCode.ASTORE_0, parser.getLastOpPosition(), obj);
+						stack.push(new FlowAssign(var, obj));
+					}
+					break;
+				case OpCode.LSTORE_0:
+				case OpCode.LSTORE_1:
+				case OpCode.LSTORE_2:
+				case OpCode.LSTORE_3:
+					{
+						FlowObject obj = stack.pop();
+						FlowVar var = getLocalSetter(op - OpCode.LSTORE_0, parser.getLastOpPosition(), obj);
 						stack.push(new FlowAssign(var, obj));
 					}
 					break;
@@ -180,6 +195,10 @@ public class Flow {
 				case OpCode.ICONST_4:
 				case OpCode.ICONST_5:
 					stack.push(new FlowIntConst(op - OpCode.ICONST_M1 - 1));
+					break;
+				case OpCode.LCONST_0:
+				case OpCode.LCONST_1:
+					stack.push(new FlowLongConst(op - OpCode.LCONST_0));
 					break;
 				case OpCode.LDC:
 					{
@@ -204,6 +223,9 @@ public class Flow {
 					break;
 				case OpCode.POP:
 					stack.pop();
+					break;
+				case OpCode.LADD:
+					stack.push(new FlowOperation(stack.pop(), "+", stack.pop()));
 					break;
 				case OpCode.INVOKEVIRTUAL:
 					{
@@ -269,6 +291,85 @@ public class Flow {
 						leave = true;
 					}
 					break;
+				case OpCode.IF_ACMPNE:
+				case OpCode.IF_ACMPEG:
+					{
+						int offset = parser.nextBranchOffset();
+						int next = parser.getPosition();
+						System.out.println("  --> true");
+						FlowBlock trueBlock = decompile(parser.getLastOpPosition() + offset);
+						System.out.println("  --> false");
+						FlowBlock falseBlock = decompile(next);
+						String cond = op == OpCode.IF_ACMPNE ? "!=" : "==";
+						stack.push(new FlowIf(new FlowCond(stack.pop(), cond, stack.pop()), trueBlock, falseBlock));
+						leave = true;
+					}
+					break;
+				case OpCode.IFEG:
+				case OpCode.IFNE:
+				case OpCode.IFLT:
+				case OpCode.IFGE:
+				case OpCode.IFGT:
+				case OpCode.IFLE:
+					{
+						int offset = parser.nextBranchOffset();
+						int next = parser.getPosition();
+						System.out.println("  --> true");
+						FlowBlock trueBlock = decompile(parser.getLastOpPosition() + offset);
+						System.out.println("  --> false");
+						FlowBlock falseBlock = decompile(next);
+						String cond;
+						switch (op) {
+							case OpCode.IFEG: cond = "=="; break;
+							case OpCode.IFNE: cond = "!="; break;
+							case OpCode.IFLT: cond = "<"; break;
+							case OpCode.IFGE: cond = ">="; break;
+							case OpCode.IFGT: cond = ">"; break;
+							case OpCode.IFLE: cond = "<="; break;
+							default: throw new IllegalStateException();
+						}
+						FlowObject left = stack.pop();
+						FlowObject right;
+						if (left instanceof FlowLongCond) {
+							FlowLongCond c = (FlowLongCond) left;
+							left = c.left;
+							right = c.right;
+						} else {
+							right = new FlowIntConst(0);
+						}
+						stack.push(new FlowIf(new FlowCond(left, cond, right), trueBlock, falseBlock));
+						leave = true;
+					}
+					break;
+				case OpCode.IF_ICMPEQ:
+				case OpCode.IF_ICMPNE:
+				case OpCode.IF_ICMPLT:
+				case OpCode.IF_ICMPGE:
+				case OpCode.IF_ICMPGT:
+				case OpCode.IF_ICMPLE:
+					{
+						int offset = parser.nextBranchOffset();
+						int next = parser.getPosition();
+						System.out.println("  --> true");
+						FlowBlock trueBlock = decompile(parser.getLastOpPosition() + offset);
+						System.out.println("  --> false");
+						FlowBlock falseBlock = decompile(next);
+						String cond;
+						switch (op) {
+							case OpCode.IF_ICMPEQ: cond = "=="; break;
+							case OpCode.IF_ICMPNE: cond = "!="; break;
+							case OpCode.IF_ICMPLT: cond = "<"; break;
+							case OpCode.IF_ICMPGE: cond = ">="; break;
+							case OpCode.IF_ICMPGT: cond = ">"; break;
+							case OpCode.IF_ICMPLE: cond = "<="; break;
+							default: throw new IllegalStateException();
+						}
+						stack.push(new FlowIf(new FlowCond(stack.pop(), cond, stack.pop()), trueBlock, falseBlock));
+					}
+					break;
+				case OpCode.LCMP:
+					stack.push(new FlowLongCond(stack.pop(), stack.pop()));
+					break;
 				case OpCode.GOTO:
 					parser.setPosition(parser.getLastOpPosition() + parser.nextBranchOffset());
 					break;
@@ -315,6 +416,7 @@ public class Flow {
 			}
 		}
 		
+		System.out.println("  #stack " + reversed(stack));
 		System.out.println("end block");
 		
 		return current;
@@ -324,7 +426,7 @@ public class Flow {
 		FlowBlock methodBlock = decompile(0);
 		
 		System.out.println("\nSource ");
-		System.out.println(methodBlock.toSource());
+		System.out.println(Indentation.indent(methodBlock.toSource()));
 	}
 	
 	private JavaMethod findMethod(int constantPoolIndex) throws ClassNotFoundException {
@@ -366,16 +468,17 @@ public class Flow {
 		return classLoader.findLoadedClass("java/lang/Object");
 	}
 	
+	@Deprecated
 	private Type toType(DescType descType) {
 		try {
-			if (descType instanceof PrimitiveDescType) {
-				return ((PrimitiveDescType) descType).getPrimitive();
+			if (descType instanceof PrimitiveType) {
+				return (PrimitiveType) descType;
 			} else if (descType instanceof ArrayDescType) {
 				ArrayDescType adt = (ArrayDescType) descType;
 				DescType dtype = adt.type;
 				Type componentType;
-				if (dtype instanceof PrimitiveDescType) {
-					componentType = ((PrimitiveDescType) dtype).getPrimitive();
+				if (dtype instanceof PrimitiveType) {
+					componentType = (PrimitiveType) dtype;
 				} else if (dtype instanceof ObjectDescType) {
 					componentType = classLoader.loadClass(((ObjectDescType) dtype).name);
 				} else {
