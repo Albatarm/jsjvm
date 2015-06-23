@@ -14,5 +14,10 @@ public class FlowLongCond extends AbstractFlowObject implements FlowIntermediate
 	public String toSource() {
 		return "";
 	}
+	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName() + "|" + left.toSource() + " op " + right.toSource();
+	}
 
 }

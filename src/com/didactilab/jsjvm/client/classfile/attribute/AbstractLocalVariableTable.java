@@ -61,16 +61,20 @@ public abstract class AbstractLocalVariableTable extends Attribute {
 		}
 	}
 	
-	public Variable getVariableAt(int addr, int index) {
+	public Variable getVariableAt(int addr, int index, int variation) {
 		for (Variable var : variables) {
 			if (var.index != index) {
 				continue;
 			}
-			if (addr >= var.startPc && addr < var.startPc + var.length) {
+			if (addr >= var.startPc - variation && addr < var.startPc + var.length + variation) {
 				return var;
 			}
 		}
 		return null;
+	}
+	
+	public Variable getVariableAt(int addr, int index) {
+		return getVariableAt(addr, index, 0);
 	}
 	
 	public Variable getOnlyVariableAt(int index) {

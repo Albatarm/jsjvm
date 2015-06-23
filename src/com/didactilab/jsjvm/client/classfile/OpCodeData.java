@@ -168,7 +168,7 @@ public enum OpCodeData {
 	FCMPG(OpCode.FCMPG, "fcmpg"),
 	DCMPL(OpCode.DCMPL, "dcmpl"),
 	DCMPG(OpCode.DCMPG, "dcmpg"),
-	IFEG(OpCode.IFEG, "ifeg", Param.BRANCH_OFFSET),
+	IFEQ(OpCode.IFEQ, "ifeq", Param.BRANCH_OFFSET),
 	IFNE(OpCode.IFNE, "ifne", Param.BRANCH_OFFSET),
 	IFLT(OpCode.IFLT, "iflt", Param.BRANCH_OFFSET),
 	IFGE(OpCode.IFGE, "ifge", Param.BRANCH_OFFSET),
@@ -180,7 +180,7 @@ public enum OpCodeData {
 	IF_ICMPGE(OpCode.IF_ICMPGE, "if_icmpge", Param.BRANCH_OFFSET),
 	IF_ICMPGT(OpCode.IF_ICMPGT, "if_icmpgt", Param.BRANCH_OFFSET),
 	IF_ICMPLE(OpCode.IF_ICMPLE, "if_icmple", Param.BRANCH_OFFSET),
-	IF_ACMPEG(OpCode.IF_ACMPEG, "if_acmpeg", Param.BRANCH_OFFSET),
+	IF_ACMPEQ(OpCode.IF_ACMPEQ, "if_acmpeq", Param.BRANCH_OFFSET),
 	IF_ACMPNE(OpCode.IF_ACMPNE, "if_acmpne", Param.BRANCH_OFFSET),
 	
 	// Control

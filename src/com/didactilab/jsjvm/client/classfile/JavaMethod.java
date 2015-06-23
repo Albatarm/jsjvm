@@ -93,6 +93,10 @@ public class JavaMethod extends JavaMember {
 		return resolvedReturnType;
 	}
 	
+	public boolean hasReturnType() {
+		return returnDescType == DescType.VOID;
+	}
+	
 	public Code getCodeAttribute() {
 		return code;
 	}

@@ -13,6 +13,7 @@ import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
+import com.didactilab.jsjvm.client.util.Strings;
 
 public class Code extends Attribute {
 	
@@ -140,7 +141,7 @@ public class Code extends Attribute {
 		
 		int pos = 0;
 		while (pos < code.length) {
-			int oppos = pos;
+			int opPosition = pos;
 			int op = code[pos++] & 0xFF;
 			OpCodeData opCode = OpCodeData.valueOf(op);
 			String text = opCode.name;
@@ -158,7 +159,7 @@ public class Code extends Attribute {
 							int byte1 = code[pos++];
 							int byte2 = code[pos++];
 							int offset = (byte1 << 8) | byte2;
-							int newpos = oppos + offset;
+							int newpos = opPosition + offset;
 							String label = labels.putLabel(newpos);
 							text += " " + label;
 						}
@@ -170,7 +171,7 @@ public class Code extends Attribute {
 							int byte3 = code[pos++];
 							int byte4 = code[pos++];
 							int offset = (byte1 << 24) | (byte2 << 16) | (byte3 << 8) | byte4;
-							int newpos = oppos + offset;
+							int newpos = opPosition + offset;
 							String label = labels.putLabel(newpos);
 							text += " " + label;
 						}
@@ -213,7 +214,7 @@ public class Code extends Attribute {
 							int index = code[pos++] & 0xFF;
 							String name;
 							if (variableTable != null) {
-								Variable var = variableTable.getVariableAt(oppos, index);
+								Variable var = variableTable.getVariableAt(opPosition, index);
 								name = var != null ? var.name : String.valueOf(index);
 							} else {
 								name = String.valueOf(index);
@@ -244,7 +245,7 @@ public class Code extends Attribute {
 				}
 			}
 			
-			instructions.add(new Instruction(oppos, text));
+			instructions.add(new Instruction(opPosition, text));
 		}
 		
 		for (Exception ex : exceptionTable) {
@@ -254,12 +255,15 @@ public class Code extends Attribute {
 		}
 		
 		Printer p = new IndentedPrinter(printer, "  ");
-		for (Instruction i : instructions) {
-			String label = labels.get(i.addr);
-			if (label != null) {
-				p.println(label, ":");
+		if (!instructions.isEmpty()) {
+			int maxAddrLen = Integer.toString(instructions.get(instructions.size() - 1).addr).length();
+			for (Instruction i : instructions) {
+				String label = labels.get(i.addr);
+				if (label != null) {
+					p.println(label, ":");
+				}
+				p.println("  ", Strings.rightPad(Integer.toString(i.addr), maxAddrLen + 2, ' '), i.text);
 			}
-			p.println("  ", i.text);
 		}
 		
 		if (exceptionTable.length != 0) {

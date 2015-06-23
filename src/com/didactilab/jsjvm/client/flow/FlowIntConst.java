@@ -3,7 +3,7 @@ package com.didactilab.jsjvm.client.flow;
 import com.didactilab.jsjvm.client.classfile.PrimitiveType;
 import com.didactilab.jsjvm.client.classfile.Type;
 
-public class FlowIntConst extends AbstractFlowObject implements FlowValue {
+public class FlowIntConst extends AbstractFlowObject implements FlowConst {
 
 	private final int value;
 

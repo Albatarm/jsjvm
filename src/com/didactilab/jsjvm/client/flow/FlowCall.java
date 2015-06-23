@@ -3,8 +3,9 @@ package com.didactilab.jsjvm.client.flow;
 import java.util.List;
 
 import com.didactilab.jsjvm.client.classfile.JavaMethod;
+import com.didactilab.jsjvm.client.classfile.Type;
 
-public class FlowCall extends AbstractFlowObject {
+public class FlowCall extends AbstractFlowObject implements FlowValue {
 
 	private final JavaMethod method;
 	private final FlowObject instance;
@@ -34,6 +35,11 @@ public class FlowCall extends AbstractFlowObject {
 		sb.appendJoin(", ", parameters);
 		sb.append(")");
 		return sb.toSource();
+	}
+
+	@Override
+	public Type getType() {
+		return method.hasReturnType() ? method.getReturnType() : null;
 	}
 	
 }

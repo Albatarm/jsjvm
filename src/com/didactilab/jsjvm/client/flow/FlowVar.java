@@ -1,5 +1,5 @@
 package com.didactilab.jsjvm.client.flow;
 
-public interface FlowVar extends FlowObject {
+public interface FlowVar extends FlowObject, FlowValue {
 	
 }

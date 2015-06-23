@@ -168,7 +168,7 @@ public interface OpCode {
 	int FCMPG = 150;
 	int DCMPL = 151;
 	int DCMPG = 152;
-	int IFEG = 153;
+	int IFEQ = 153;
 	int IFNE = 154;
 	int IFLT = 155;
 	int IFGE = 156;
@@ -180,7 +180,7 @@ public interface OpCode {
 	int IF_ICMPGE = 162;
 	int IF_ICMPGT = 163;
 	int IF_ICMPLE = 164;
-	int IF_ACMPEG = 165;
+	int IF_ACMPEQ = 165;
 	int IF_ACMPNE = 166;
 	
 	// Control

@@ -69,7 +69,7 @@ public class DescriptorParser {
 			}
 			return new ArrayDescType(dimension, createBaseType(componentType));
 		} else if (acceptVoid && firstChar == 'V') {
-			return new VoidDescType();
+			return DescType.VOID;
 		} else {
 			return createBaseType(token);
 		}

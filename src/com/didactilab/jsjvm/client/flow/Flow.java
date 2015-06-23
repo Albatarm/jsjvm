@@ -3,8 +3,6 @@ package com.didactilab.jsjvm.client.flow;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Deque;
 
 import com.didactilab.jsjvm.client.classfile.ArrayType;
@@ -33,18 +31,18 @@ import com.didactilab.jsjvm.client.classfile.descriptor.ArrayDescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescriptorParser;
 import com.didactilab.jsjvm.client.classfile.descriptor.ObjectDescType;
-import com.didactilab.jsjvm.client.classfile.descriptor.VoidDescType;
 import com.didactilab.jsjvm.client.debug.SystemPrinter;
 import com.didactilab.jsjvm.client.loader.JRESystemJavaClassLoader;
 import com.didactilab.jsjvm.client.loader.JavaClassLoader;
 import com.didactilab.jsjvm.client.util.Indentation;
+import com.didactilab.jsjvm.client.util.Iterables;
 
 public class Flow {
 
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		JRESystemJavaClassLoader classLoader = new JRESystemJavaClassLoader(new File("build/runtime"));
-		JavaClass javaClass = classLoader.loadClass("java/lang/Object", true);
-		JavaMethod method = javaClass.findMethod("wait", "(JI)V");
+		JavaClass javaClass = classLoader.loadClass("java/lang/Integer", true);
+		JavaMethod method = javaClass.findMethod("toString", "(II)Ljava/lang/String;");
 		//JavaMethod method = javaClass.findMethod("valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
 		//JavaMethod method = javaClass.findMethod("getBytes", "(Ljava/nio/charset/Charset;)[B");
 		//JavaMethod method = javaClass.findMethod("copyValueOf", "([CII)Ljava/lang/String;");
@@ -54,7 +52,7 @@ public class Flow {
 		method.print(new SystemPrinter());
 		
 		Flow flow = new Flow(method);
-		flow.run();
+		//flow.run();
 	}
 	
 	/*private static class BlockPosition {
@@ -96,16 +94,16 @@ public class Flow {
 			System.out.println("  var " + param.localIndex + " => " + locals[param.localIndex] + " from " + param);
 		}
 		if (!method.isStatic()) {
-			locals[0] = new FlowThis();
+			locals[0] = new FlowThis(method.getJavaClass());
 		}
 	}
 	
-	private FlowVar getLocalSetter(int index, int addr, FlowObject value) {
+	private FlowVar getLocalSetter(int index, int addr, FlowObject value, Type instructionType) {
 		if (locals[index] == null) {
 			Type type;
 			String name;
 			if (varTable != null) {
-				Variable var = varTable.getVariableAt(addr+1, index);
+				Variable var = varTable.getVariableAt(addr, index, 3);
 				if (var == null) {
 					throw new IllegalStateException("Local " + index + " at " + addr + " not found in var table");
 				} else {
@@ -115,11 +113,14 @@ public class Flow {
 				}
 			} else {
 				type = value instanceof FlowValue ? ((FlowValue) value).getType() : getObjectType();
+				if (type == null && instructionType != null) {
+					type = instructionType;
+				}
 				name = "local" + index;
 			}
-			FlowLocal local = new FlowLocal(name);
+			FlowLocal local = new FlowLocal(name, type);
 			locals[index] = local;
-			return new FlowDeclareVar(local, new FlowType(type.getJavaName()));
+			return new FlowDeclareVar(local);
 		}
 		return locals[index];
 	}
@@ -143,7 +144,7 @@ public class Flow {
 		boolean leave = false;
 		while (!leave && parser.hasMore()) {
 			int op = parser.nextOp();
-			System.out.println("  #stack " + reversed(stack));
+			System.out.println("  #stack " + Iterables.reversed(stack));
 			System.out.println("  read " + OpCodeData.valueOf(op));
 			switch (op) {
 				case OpCode.ALOAD_0:
@@ -152,11 +153,12 @@ public class Flow {
 				case OpCode.ALOAD_3:
 					stack.push(getLocal(op - OpCode.ALOAD_0));
 					break;
+				case OpCode.ILOAD:
 				case OpCode.ILOAD_0:
 				case OpCode.ILOAD_1:
 				case OpCode.ILOAD_2:
 				case OpCode.ILOAD_3:
-					stack.push(getLocal(op - OpCode.ILOAD_0));
+					stack.push(getLocal(op == OpCode.ILOAD ? parser.nextLocalVariableIndex() : op - OpCode.ILOAD_0));
 					break;
 				case OpCode.LLOAD_0:
 				case OpCode.LLOAD_1:
@@ -170,7 +172,19 @@ public class Flow {
 				case OpCode.ASTORE_3:
 					{
 						FlowObject obj = stack.pop();
-						FlowVar var = getLocalSetter(op - OpCode.ASTORE_0, parser.getLastOpPosition(), obj);
+						FlowVar var = getLocalSetter(op - OpCode.ASTORE_0, parser.getLastOpPosition(), obj, getObjectType());
+						stack.push(new FlowAssign(var, obj));
+					}
+					break;
+				case OpCode.ISTORE:
+				case OpCode.ISTORE_0:
+				case OpCode.ISTORE_1:
+				case OpCode.ISTORE_2:
+				case OpCode.ISTORE_3:
+					{
+						FlowObject obj = stack.pop();
+						FlowVar var = getLocalSetter(op == OpCode.ISTORE ? parser.nextLocalVariableIndex() : op - OpCode.ISTORE_0, 
+								parser.getLastOpPosition(), obj, PrimitiveType.INT);
 						stack.push(new FlowAssign(var, obj));
 					}
 					break;
@@ -180,7 +194,7 @@ public class Flow {
 				case OpCode.LSTORE_3:
 					{
 						FlowObject obj = stack.pop();
-						FlowVar var = getLocalSetter(op - OpCode.LSTORE_0, parser.getLastOpPosition(), obj);
+						FlowVar var = getLocalSetter(op - OpCode.LSTORE_0, parser.getLastOpPosition(), obj, PrimitiveType.LONG);
 						stack.push(new FlowAssign(var, obj));
 					}
 					break;
@@ -199,6 +213,21 @@ public class Flow {
 				case OpCode.LCONST_0:
 				case OpCode.LCONST_1:
 					stack.push(new FlowLongConst(op - OpCode.LCONST_0));
+					break;
+				case OpCode.CALOAD:
+					{
+						FlowObject ref = stack.pop();
+						FlowObject index = stack.pop();
+						stack.push(new FlowArrayGet(ref, index, PrimitiveType.CHAR));
+					}
+					break;
+				case OpCode.CASTORE:
+					{
+						FlowObject ref = stack.pop();
+						FlowObject index = stack.pop();
+						FlowObject value = stack.pop();
+						stack.push(new FlowAssign(new FlowArrayGet(ref, index, PrimitiveType.CHAR), value));
+					}
 					break;
 				case OpCode.LDC:
 					{
@@ -221,11 +250,46 @@ public class Flow {
 						}
 					}
 					break;
+				case OpCode.BIPUSH:
+					stack.push(new FlowIntConst(parser.nextByteValue()));
+					break;
 				case OpCode.POP:
 					stack.pop();
 					break;
 				case OpCode.LADD:
 					stack.push(new FlowOperation(stack.pop(), "+", stack.pop()));
+					break;
+				case OpCode.ISUB: 
+					{
+						FlowObject left = stack.pop();
+						FlowObject right = stack.pop();
+						stack.push(new FlowOperation(left, "-", right));
+					}
+					break;
+				case OpCode.IDIV:
+					{
+						FlowObject left = stack.pop();
+						FlowObject right = stack.pop();
+						stack.push(new FlowOperation(left, "/", right));
+					}
+					break;
+				case OpCode.IREM:
+					{
+						FlowObject left = stack.pop();
+						FlowObject right = stack.pop();
+						stack.push(new FlowOperation(left, "%", right));
+					}
+					break;
+				case OpCode.IINC:
+					{
+						int index = parser.nextLocalVariableIndex();
+						int iconst = parser.nextByteValue();
+						FlowVar var = getLocal(index);
+						stack.push(new FlowInc(var, iconst));
+					}
+					break;
+				case OpCode.INEG:
+					stack.push(new FlowNegation(stack.pop()));
 					break;
 				case OpCode.INVOKEVIRTUAL:
 					{
@@ -278,6 +342,80 @@ public class Flow {
 						}
 					}
 					break;
+				case OpCode.IFNONNULL:
+				case OpCode.IFNULL:
+				case OpCode.IF_ACMPNE:
+				case OpCode.IF_ACMPEQ:
+				case OpCode.IFEQ:
+				case OpCode.IFNE:
+				case OpCode.IFLT:
+				case OpCode.IFGE:
+				case OpCode.IFGT:
+				case OpCode.IFLE:
+				case OpCode.IF_ICMPEQ:
+				case OpCode.IF_ICMPNE:
+				case OpCode.IF_ICMPLT:
+				case OpCode.IF_ICMPGE:
+				case OpCode.IF_ICMPGT:
+				case OpCode.IF_ICMPLE:
+					{
+						int offset = parser.nextBranchOffset();
+						int next = parser.getPosition();
+						System.out.println("  --> true");
+						FlowBlock trueBlock = decompile(parser.getLastOpPosition() + offset);
+						System.out.println("  --> false");
+						FlowBlock falseBlock = decompile(next);
+						
+						FlowOperator operator = toOperator(op);
+						FlowObject left = stack.pop();
+						FlowObject right;
+						if (op == OpCode.IFNONNULL || op == OpCode.IFNULL) {
+							right = new FlowNull();
+						} else if (op >= OpCode.IFEQ && op <= OpCode.IFLE) {
+							if (left instanceof FlowLongCond) {
+								FlowLongCond c = (FlowLongCond) left;
+								left = c.left;
+								right = c.right;
+							} else {
+								right = new FlowIntConst(0);
+							}
+						} else {
+							right = stack.pop();
+						}
+						
+						if (right instanceof FlowConst) {
+							FlowObject nextRight = left;
+							left = right;
+							right = nextRight;
+							operator = operator.inverse();
+							FlowBlock nextFalseBlock = trueBlock;
+							trueBlock = falseBlock;
+							falseBlock = nextFalseBlock;
+						}
+						
+						// inverse
+						FlowObject nextRight = left;
+						left = right;
+						right = nextRight;
+						operator = operator.inverse();
+						FlowBlock nextFalseBlock = trueBlock;
+						trueBlock = falseBlock;
+						falseBlock = nextFalseBlock;
+						
+						//stack.push(new FlowIf(new FlowCond(left, operator, right), trueBlock, falseBlock));
+						FlowCond cond = new FlowCond(left, operator, right);
+						if (trueBlock.isLastInstructionFinal()) {
+							stack.push(new FlowIf(cond, trueBlock));
+							falseBlock.copyTo(stack);
+							//stack.push(falseBlock);
+						} else {
+							stack.push(new FlowIf(cond, trueBlock, falseBlock));
+						}
+						leave = true;
+					}
+					break;
+					
+				/*	
 				case OpCode.IFNONNULL: 
 					{
 						int offset = parser.nextBranchOffset();
@@ -366,7 +504,7 @@ public class Flow {
 						}
 						stack.push(new FlowIf(new FlowCond(stack.pop(), cond, stack.pop()), trueBlock, falseBlock));
 					}
-					break;
+					break;*/
 				case OpCode.LCMP:
 					stack.push(new FlowLongCond(stack.pop(), stack.pop()));
 					break;
@@ -389,6 +527,12 @@ public class Flow {
 					{
 						JavaField field = findField(parser.nextConstantPoolIndex());
 						stack.push(new FlowField(stack.pop(), field));
+					}
+					break;
+				case OpCode.GETSTATIC:
+					{
+						JavaField field = findField(parser.nextConstantPoolIndex());
+						stack.push(new FlowField(field));
 					}
 					break;
 				case OpCode.NEW:
@@ -416,7 +560,7 @@ public class Flow {
 			}
 		}
 		
-		System.out.println("  #stack " + reversed(stack));
+		System.out.println("  #stack " + Iterables.reversed(stack));
 		System.out.println("end block");
 		
 		return current;
@@ -454,12 +598,6 @@ public class Flow {
 		return classLoader.loadClass(classConstant.getName());
 	}
 	
-	private <T> Collection<T> reversed(Collection<T> c) {
-		ArrayList<T> l = new ArrayList<>(c);
-		Collections.reverse(l);
-		return l;
-	}
-	
 	private Type getStringType() {
 		return classLoader.findLoadedClass("java/lang/String");
 	}
@@ -487,13 +625,42 @@ public class Flow {
 				return new ArrayType(adt.dimension, componentType, adt.getDescriptor());
 			} else if (descType instanceof ObjectDescType) {
 				return classLoader.loadClass(((ObjectDescType) descType).name);
-			} else if (descType instanceof VoidDescType) {
+			} else if (descType == DescType.VOID) {
 				return null;
 			} else {
 				throw new IllegalStateException("descriptor parser fails : " + descType);
 			}
 		} catch (ClassNotFoundException e) {
 			throw new IllegalArgumentException("Cannot be possible");
+		}
+	}
+	
+	private FlowOperator toOperator(int op) {
+		switch (op) {
+		case OpCode.IFNONNULL: 
+		case OpCode.IFNE: 
+		case OpCode.IF_ICMPNE:
+		case OpCode.IF_ACMPNE:	return FlowOperator.NE;
+		
+		case OpCode.IFNULL:	
+		case OpCode.IF_ACMPEQ: 
+		case OpCode.IFEQ: 
+		case OpCode.IF_ICMPEQ: return FlowOperator.EQ;
+			
+		case OpCode.IF_ICMPLT:
+		case OpCode.IFLT: return FlowOperator.LT;
+		
+		case OpCode.IF_ICMPGE:
+		case OpCode.IFGE: return FlowOperator.GE;
+		
+		case OpCode.IF_ICMPGT:
+		case OpCode.IFGT: return FlowOperator.GT;
+		
+		case OpCode.IF_ICMPLE:
+		case OpCode.IFLE: return FlowOperator.LE;
+		
+		default:
+			throw new IllegalArgumentException();
 		}
 	}
 	

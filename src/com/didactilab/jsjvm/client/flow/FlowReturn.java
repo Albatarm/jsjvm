@@ -1,6 +1,6 @@
 package com.didactilab.jsjvm.client.flow;
 
-public class FlowReturn implements FlowObject {
+public class FlowReturn extends AbstractFlowObject implements FlowFinalInstruction {
 
 	private final FlowObject obj;
 

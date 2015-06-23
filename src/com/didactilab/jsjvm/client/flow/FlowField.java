@@ -8,6 +8,11 @@ public class FlowField extends AbstractMemberFlowObject implements FlowValue {
 	private final FlowObject instance;
 	private final JavaField field;
 
+	/** Static part */
+	public FlowField(JavaField field) {
+		this(null, field);
+	}
+	
 	public FlowField(FlowObject instance, JavaField field) {
 		super(null);
 		this.instance = instance;
@@ -16,7 +21,7 @@ public class FlowField extends AbstractMemberFlowObject implements FlowValue {
 	
 	@Override
 	public String toSource() {
-		return instance.toSource() + "." + field.getName();
+		return (instance != null ? instance.toSource() : field.getJavaClass().getJavaName()) + "." + field.getName();
 	}
 	
 	@Override

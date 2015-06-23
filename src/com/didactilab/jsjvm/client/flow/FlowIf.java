@@ -6,6 +6,10 @@ public class FlowIf extends AbstractFlowObject {
 	private final FlowBlock trueBlock;
 	private final FlowBlock falseBlock;
 
+	public FlowIf(FlowObject cond, FlowBlock trueBlock) {
+		this(cond, trueBlock, null);
+	}
+	
 	public FlowIf(FlowObject cond, FlowBlock trueBlock, FlowBlock falseBlock) {
 		this.cond = cond;
 		this.trueBlock = trueBlock;
@@ -14,7 +18,7 @@ public class FlowIf extends AbstractFlowObject {
 	
 	@Override
 	public String toSource() {
-		return "if (" + cond.toSource() + ") " + trueBlock.toSource() + " else " + falseBlock.toSource();
+		return "if (" + cond.toSource() + ") " + trueBlock.toSource() + (falseBlock != null ? " else " + falseBlock.toSource() : "");
 	}
 	
 	@Override

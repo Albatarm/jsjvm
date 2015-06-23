@@ -25,6 +25,10 @@ public class CodeParser {
 		return nextUnsignedShort();
 	}
 	
+	public int nextLocalVariableIndex() {
+		return nextUnsignedByte();
+	}
+	
 	public int nextConstantPoolIndexByte() {
 		return nextUnsignedByte();
 	}
@@ -37,6 +41,10 @@ public class CodeParser {
 		return nextSignedShort();
 	}
 	
+	public int nextByteValue() {
+		return nextSignedByte();
+	}
+	
 	public boolean hasMore() {
 		return position < code.length;
 	}
@@ -47,6 +55,10 @@ public class CodeParser {
 	
 	public void setPosition(int position) {
 		this.position = position;
+	}
+	
+	private int nextSignedByte() {
+		return code[position++];
 	}
 	
 	private int nextUnsignedByte() {

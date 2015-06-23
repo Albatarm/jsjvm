@@ -1,6 +1,9 @@
 package com.didactilab.jsjvm.client.flow;
 
-public class FlowArrayLength extends AbstractFlowObject {
+import com.didactilab.jsjvm.client.classfile.PrimitiveType;
+import com.didactilab.jsjvm.client.classfile.Type;
+
+public class FlowArrayLength extends AbstractFlowObject implements FlowValue {
 
 	private final FlowObject obj;
 
@@ -11,6 +14,11 @@ public class FlowArrayLength extends AbstractFlowObject {
 	@Override
 	public String toSource() {
 		return obj.toSource() + ".length";
+	}
+
+	@Override
+	public Type getType() {
+		return PrimitiveType.INT;
 	}
 
 }

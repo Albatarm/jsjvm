@@ -1,6 +1,6 @@
 package com.didactilab.jsjvm.client.flow;
 
-public class FlowThrow extends AbstractFlowObject {
+public class FlowThrow extends AbstractFlowObject implements FlowFinalInstruction {
 
 	private final FlowObject exception;
 

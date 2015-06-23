@@ -2,7 +2,7 @@ package com.didactilab.jsjvm.client.flow;
 
 import com.didactilab.jsjvm.client.classfile.Type;
 
-public class FlowStringConst extends AbstractFlowObject implements FlowValue {
+public class FlowStringConst extends AbstractFlowObject implements FlowConst {
 
 	private final String value;
 	private final Type stringType;

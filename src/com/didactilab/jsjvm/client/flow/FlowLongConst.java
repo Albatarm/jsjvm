@@ -3,7 +3,7 @@ package com.didactilab.jsjvm.client.flow;
 import com.didactilab.jsjvm.client.classfile.PrimitiveType;
 import com.didactilab.jsjvm.client.classfile.Type;
 
-public class FlowLongConst extends AbstractFlowObject implements FlowValue {
+public class FlowLongConst extends AbstractFlowObject implements FlowConst {
 
 	private final long value;
 
@@ -13,7 +13,7 @@ public class FlowLongConst extends AbstractFlowObject implements FlowValue {
 	
 	@Override
 	public String toSource() {
-		return String.valueOf(value);
+		return String.valueOf(value) + "L";
 	}
 
 	@Override

@@ -6,7 +6,6 @@ import com.didactilab.jsjvm.client.classfile.attribute.Attributes;
 import com.didactilab.jsjvm.client.classfile.descriptor.ArrayDescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.DescType;
 import com.didactilab.jsjvm.client.classfile.descriptor.ObjectDescType;
-import com.didactilab.jsjvm.client.classfile.descriptor.VoidDescType;
 import com.didactilab.jsjvm.client.debug.IndentedPrinter;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
@@ -90,7 +89,7 @@ public abstract class JavaMember {
 			return new ArrayType(adt.dimension, componentType, adt.getDescriptor());
 		} else if (descType instanceof ObjectDescType) {
 			return getJavaClass().getClassLoader().loadClass(((ObjectDescType) descType).name);
-		} else if (descType instanceof VoidDescType) {
+		} else if (descType == DescType.VOID) {
 			return null;
 		} else {
 			throw new IllegalStateException("descriptor parser fails : " + descType);
