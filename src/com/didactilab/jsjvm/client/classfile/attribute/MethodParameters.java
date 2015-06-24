@@ -2,11 +2,11 @@ package com.didactilab.jsjvm.client.classfile.attribute;
 
 import java.io.IOException;
 
-import com.didactilab.jsjvm.client.Factory;
 import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
+import com.didactilab.jsjvm.client.util.Factory;
 
 public class MethodParameters extends Attribute {
 	

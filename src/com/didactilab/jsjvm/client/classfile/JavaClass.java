@@ -175,7 +175,7 @@ public class JavaClass implements Type {
 	public static void main(String[] args) throws IOException {
 		JRESystemJavaClassLoader classLoader = new JRESystemJavaClassLoader(new File("build/runtime"));
 		try {
-			JavaClass clazz = classLoader.loadClass("java/lang/Integer");
+			JavaClass clazz = classLoader.loadClass("java/lang/Class");
 			classLoader.resolveClass(clazz);
 			clazz.print(new SystemPrinter());
 		} catch (ClassNotFoundException e) {

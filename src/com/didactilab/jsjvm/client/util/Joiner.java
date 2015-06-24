@@ -1,4 +1,4 @@
-package com.didactilab.jsjvm.client;
+package com.didactilab.jsjvm.client.util;
 
 import java.util.Arrays;
 import java.util.Collection;

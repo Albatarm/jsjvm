@@ -1,6 +1,6 @@
 package com.didactilab.jsjvm.client.classfile.attribute;
 
-import com.didactilab.jsjvm.client.Factory;
+import com.didactilab.jsjvm.client.util.Factory;
 
 public class RuntimeVisibleAnnotations extends AbstractRuntimeAnnotations {
 	

@@ -21,7 +21,24 @@
 		<mkdir dir="${build.runtime}" />
 		<javac destdir="${build.runtime}" target="1.8" includeJavaRuntime="true" includeantruntime="false" debug="true">
 			<src path="build/runtime-src" />
+			<!--<include name="java/lang/*.java" />
+			<include name="java/io/Serializable.java" />
+			<include name="java/io/ObjectStreamField.java" />
+			<include name="java/util/Comparator.java" />-->
+		</javac>
+	</target>
+	
+	<target name="build-runtime2" description="Build runtime">
+		<delete dir="${build.runtime}" />
+		<mkdir dir="${build.runtime}" />
+		<javac destdir="${build.runtime}" target="1.8" includeJavaRuntime="false" includeantruntime="false" debug="true" >
+			<src path="build/runtime-src" />
 			<include name="java/lang/*.java" />
+			<!--<include name="java/io/Serializable.java" />
+			<include name="java/io/ObjectStreamField.java" />
+			<include name="java/util/Comparator.java" />
+			<include name="java/nio/charset/Charset.java" />
+			<include name="java/util/Locale.java" />-->
 		</javac>
 	</target>
 

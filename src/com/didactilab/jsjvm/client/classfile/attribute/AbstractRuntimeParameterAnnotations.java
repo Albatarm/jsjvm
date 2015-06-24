@@ -2,12 +2,12 @@ package com.didactilab.jsjvm.client.classfile.attribute;
 
 import java.io.IOException;
 
-import com.didactilab.jsjvm.client.Joiner;
 import com.didactilab.jsjvm.client.classfile.ClassFormatException;
 import com.didactilab.jsjvm.client.classfile.attribute.AbstractRuntimeAnnotations.Annotation;
 import com.didactilab.jsjvm.client.classfile.constant.ConstantPool;
 import com.didactilab.jsjvm.client.debug.Printer;
 import com.didactilab.jsjvm.client.reader.Reader;
+import com.didactilab.jsjvm.client.util.Joiner;
 
 public class AbstractRuntimeParameterAnnotations extends Attribute {
 
