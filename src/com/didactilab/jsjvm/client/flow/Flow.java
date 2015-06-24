@@ -42,7 +42,8 @@ public class Flow {
 	public static void main(String[] args) throws IOException, ClassNotFoundException {
 		JRESystemJavaClassLoader classLoader = new JRESystemJavaClassLoader(new File("build/runtime"));
 		JavaClass javaClass = classLoader.loadClass("java/lang/Integer", true);
-		JavaMethod method = javaClass.findMethod("toString", "(II)Ljava/lang/String;");
+		JavaMethod method = javaClass.findMethod("numberOfTrailingZeros", "(I)I");
+		//JavaMethod method = javaClass.findMethod("toString", "(II)Ljava/lang/String;");
 		//JavaMethod method = javaClass.findMethod("valueOf", "(Ljava/lang/Object;)Ljava/lang/String;");
 		//JavaMethod method = javaClass.findMethod("getBytes", "(Ljava/nio/charset/Charset;)[B");
 		//JavaMethod method = javaClass.findMethod("copyValueOf", "([CII)Ljava/lang/String;");
@@ -52,18 +53,8 @@ public class Flow {
 		method.print(new SystemPrinter());
 		
 		Flow flow = new Flow(method);
-		//flow.run();
+		flow.run();
 	}
-	
-	/*private static class BlockPosition {
-		public final FlowBlock block;
-		public final int addr;
-		
-		public BlockPosition(FlowBlock block, int addr) {
-			this.block = block;
-			this.addr = addr;
-		}
-	}*/
 	
 	private final JavaClassLoader classLoader;
 	private final JavaMethod method;
@@ -291,6 +282,20 @@ public class Flow {
 				case OpCode.INEG:
 					stack.push(new FlowNegation(stack.pop()));
 					break;
+				case OpCode.ISHL:
+					{
+						FlowObject left = stack.pop();
+						FlowObject right = stack.pop();
+						stack.push(new FlowOperation(left, "<<", right));
+					}
+					break;
+				case OpCode.IUSHR:
+				{
+					FlowObject left = stack.pop();
+					FlowObject right = stack.pop();
+					stack.push(new FlowOperation(left, ">>>", right));
+				}
+				break;
 				case OpCode.INVOKEVIRTUAL:
 					{
 						JavaMethod anotherMethod = findMethod(parser.nextConstantPoolIndex());
@@ -414,97 +419,6 @@ public class Flow {
 						leave = true;
 					}
 					break;
-					
-				/*	
-				case OpCode.IFNONNULL: 
-					{
-						int offset = parser.nextBranchOffset();
-						int next = parser.getPosition();
-						System.out.println("  --> true");
-						FlowBlock trueBlock = decompile(parser.getLastOpPosition() + offset);
-						System.out.println("  --> false");
-						FlowBlock falseBlock = decompile(next);
-						
-						stack.push(new FlowIf(new FlowCond(stack.pop(), "!=", new FlowNull()), trueBlock, falseBlock));
-						leave = true;
-					}
-					break;
-				case OpCode.IF_ACMPNE:
-				case OpCode.IF_ACMPEG:
-					{
-						int offset = parser.nextBranchOffset();
-						int next = parser.getPosition();
-						System.out.println("  --> true");
-						FlowBlock trueBlock = decompile(parser.getLastOpPosition() + offset);
-						System.out.println("  --> false");
-						FlowBlock falseBlock = decompile(next);
-						String cond = op == OpCode.IF_ACMPNE ? "!=" : "==";
-						stack.push(new FlowIf(new FlowCond(stack.pop(), cond, stack.pop()), trueBlock, falseBlock));
-						leave = true;
-					}
-					break;
-				case OpCode.IFEG:
-				case OpCode.IFNE:
-				case OpCode.IFLT:
-				case OpCode.IFGE:
-				case OpCode.IFGT:
-				case OpCode.IFLE:
-					{
-						int offset = parser.nextBranchOffset();
-						int next = parser.getPosition();
-						System.out.println("  --> true");
-						FlowBlock trueBlock = decompile(parser.getLastOpPosition() + offset);
-						System.out.println("  --> false");
-						FlowBlock falseBlock = decompile(next);
-						String cond;
-						switch (op) {
-							case OpCode.IFEG: cond = "=="; break;
-							case OpCode.IFNE: cond = "!="; break;
-							case OpCode.IFLT: cond = "<"; break;
-							case OpCode.IFGE: cond = ">="; break;
-							case OpCode.IFGT: cond = ">"; break;
-							case OpCode.IFLE: cond = "<="; break;
-							default: throw new IllegalStateException();
-						}
-						FlowObject left = stack.pop();
-						FlowObject right;
-						if (left instanceof FlowLongCond) {
-							FlowLongCond c = (FlowLongCond) left;
-							left = c.left;
-							right = c.right;
-						} else {
-							right = new FlowIntConst(0);
-						}
-						stack.push(new FlowIf(new FlowCond(left, cond, right), trueBlock, falseBlock));
-						leave = true;
-					}
-					break;
-				case OpCode.IF_ICMPEQ:
-				case OpCode.IF_ICMPNE:
-				case OpCode.IF_ICMPLT:
-				case OpCode.IF_ICMPGE:
-				case OpCode.IF_ICMPGT:
-				case OpCode.IF_ICMPLE:
-					{
-						int offset = parser.nextBranchOffset();
-						int next = parser.getPosition();
-						System.out.println("  --> true");
-						FlowBlock trueBlock = decompile(parser.getLastOpPosition() + offset);
-						System.out.println("  --> false");
-						FlowBlock falseBlock = decompile(next);
-						String cond;
-						switch (op) {
-							case OpCode.IF_ICMPEQ: cond = "=="; break;
-							case OpCode.IF_ICMPNE: cond = "!="; break;
-							case OpCode.IF_ICMPLT: cond = "<"; break;
-							case OpCode.IF_ICMPGE: cond = ">="; break;
-							case OpCode.IF_ICMPGT: cond = ">"; break;
-							case OpCode.IF_ICMPLE: cond = "<="; break;
-							default: throw new IllegalStateException();
-						}
-						stack.push(new FlowIf(new FlowCond(stack.pop(), cond, stack.pop()), trueBlock, falseBlock));
-					}
-					break;*/
 				case OpCode.LCMP:
 					stack.push(new FlowLongCond(stack.pop(), stack.pop()));
 					break;
